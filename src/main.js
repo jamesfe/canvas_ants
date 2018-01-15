@@ -17,6 +17,12 @@ var height = canvas.height;
 var width = canvas.width;
 var ctx = canvas.getContext('2d');
 
+function putPixel(coord, col) {
+  ctx.fillStyle = "rgba("+col[0]+","+col[1]+","+col[2]+",128)";
+  ctx.fillRect(coord.x, coord.y, 1, 1 );
+}
+
+
 // setInterval(updateWorld, 100);
 
 class GlobalTarget {
@@ -83,9 +89,8 @@ function updateWorld() {
     ants[i].chooseNextPath();
   }
 
-  function putPixel(coord, col) {
-    ctx.fillStyle = "rgba("+col[0]+","+col[1]+","+col[2]+",128)";
-    ctx.fillRect(coord.x, coord.y, 1, 1 );
+  for (i in globalTargets) {
+    putPixel(globalTargets[i], [255, 0, 0]);
   }
 
 }

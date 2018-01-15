@@ -36,10 +36,13 @@ class GlobalTarget {
   }
 }
 
+let contextSize = 3;
+
 class Ant {
   constructor(x, y) {
     this.x = x;
     this.y = y;
+    this.tc = Array(contextSize).fill([]).map(x => Array(contextSize).fill(0))
   }
 
   coord() {

@@ -10,7 +10,8 @@ function getDistance(p1, p2) {
   return Math.sqrt( a*a + b*b );
 }
 
-var runs = 10;
+var runs = 50;
+// var runs = 5000;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
 var width = canvas.width;
@@ -76,7 +77,7 @@ for (var i = 0; i < 10; i++) {
 
 function updateWorld() {
   console.log('Updating canvas.');
-  for (var i = 0; i < 10; i++) {
+  for (i in ants) {
     console.log('Updating ant ' + i);
     putPixel(ants[i].coord(), [0, 0, 0]);
     ants[i].chooseNextPath();

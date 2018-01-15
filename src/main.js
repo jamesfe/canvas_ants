@@ -51,18 +51,50 @@ class Ant {
   }
 
   chooseNextPath() {
-    this.x += getRandomInt(-1, 1);
-    this.y += getRandomInt(-1, 1);
+    var choice = undefined;
+    if (getRandomInt(0, 3) === 0) {
+      choice = this.randomWalk()
+    } else {
+      choice = this.headToTarget()
+    }
+    this.x = choice.x;
+    this.y = choice.y;
   }
 
-  findClosestTarget(targets) {
+  randomWalk() {
+    return {
+      x: this.x + getRandomInt(-1, 1),
+      y: this.y + getRandomInt(-1, 1)
+    };
+  }
+
+  headToTarget() {
+    let tgt = this.findClosestTarget();
+    var dx = 0;
+    var dy = 0;
+    if (this.x < tgt.x) { dx = 1; }
+    if (this.x > tgt.x) { dx = -1; }
+    if (this.y < tgt.y) { dy = 1; }
+    if (this.y > tgt.y) { dy = -1; }
+
+    return {
+      x: this.x + dx,
+      y: this.y + dy
+    };
+  }
+
+  registerTargets(targets) {
+    this.targets = targets;
+  }
+
+  findClosestTarget() {
     var minDist = getDistance({x: 0, y: 0}, {x: width, y: height});
     var minTarget = undefined;
-    for (t in targets) {
-      var dist = getDistance(this.coord(), t.coord());
+    for (var t in this.targets) {
+      var dist = getDistance(this.coord(), this.targets[t].coord());
       if (dist < minDist) {
         minDist = dist;
-        minTarget = t;
+        minTarget = this.targets[t];
       }
     }
     return(minTarget);
@@ -82,6 +114,7 @@ for (var i = 0; i < 10; i++) {
   var randY = getRandomInt(0, height);
   console.log("Randoms: " + randX + " " + randY);
   ants.push(new Ant(randX, randY));
+  ants[i].registerTargets(globalTargets);
 }
 
 function updateWorld() {
@@ -97,7 +130,6 @@ function updateWorld() {
   }
 
 }
-
 
 for (var p = 0; p < runs; p++) {
   console.log('Setting timeout...');

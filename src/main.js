@@ -42,7 +42,7 @@ class Ant {
   constructor(x, y) {
     this.x = x;
     this.y = y;
-    this.tc = Array(contextSize).fill([]).map(x => Array(contextSize).fill(0))
+    this.tc = Array(contextSize).fill([]).map(x => Array(contextSize).fill(0));
   }
 
   coord() {
@@ -106,6 +106,27 @@ for (var i = 0; i < 4; i++) {
   var randX = getRandomInt(0, width);
   var randY = getRandomInt(0, height);
   globalTargets.push(new GlobalTarget(randX, randY));
+}
+
+function generateDistanceMap(targets, height, width) {
+  /* Returns a matrix keyed by [w][h] */
+  var maxDist = getDistance({x: 0, y: 0}, {x: width, y: height});
+  var distanceMap = Array(height).fill([]).map(x => Array(width).fill(0));
+  for (var h = 0; h < height; h++) {
+    for (var w = 0; w < width; w++) {
+      var minTarget = undefined;
+      for (var t in targets) {
+        var minDist = maxDist; // set it to the max value, then find smaller values
+        var dist = getDistance({x: h, y: w}, targets[t].coord());
+        if (dist < minDist) {
+          minDist = dist;
+          minTarget = targets[t];
+        }
+      }
+      distanceMap[h][w] = (255 * minDist) / maxDist; // scale so it's <= 255
+    }
+  }
+  return (distanceMap);
 }
 
 var ants = [];

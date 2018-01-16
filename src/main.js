@@ -1,4 +1,3 @@
-let t0 = performance.now();
 let antColor = [255, 255, 255];
 let targetColor = [255, 0, 0];
 let backgroundColor = [0, 0, 0];
@@ -8,7 +7,7 @@ function getRandomInt(min, max) {
 }
 
 function sameColor(c1, c2) {
-  return (c1[0]===c2[0]) && (c1[1]===c2[1]) && (c1[2]===c2[2]);
+  return (typeof c1 !== 'undefined' && typeof c2 !== 'undefined' && c1[0]===c2[0] && c1[1]===c2[1] && c1[2]===c2[2]);
 }
 
 function getDistance(p1, p2) {
@@ -19,9 +18,9 @@ function getDistance(p1, p2) {
 }
 
 // var runs = 50;
-var runs = 3;
-var numAnts = 30;
-var runs = 500;
+var runs = 10;
+var numAnts = 300;
+var runs = 50;;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
 var width = canvas.width;
@@ -90,31 +89,34 @@ function clearScreen(col) {
   ctx.fillRect(0, 0, height, width);
 }
 
+
+
 function updateWorld() {
-
+  // debugger;
   let subt0 = performance.now();
-  console.log('Updating canvas.');
 
-  let pixelData = ctx.getImageData(0, 0, width, height).data;
-  clearScreen(backgroundColor);
-  for (i in ants) {
-    ants[i].getTempContext(pixelData)
-    putPixel(ants[i].coord(), antColor);
-    ants[i].chooseNextPath();
-  }
-
+  // clearScreen(backgroundColor);
   for (i in globalTargets) {
     putPixel(globalTargets[i], targetColor);
+  }
+
+  for (i in ants) {
+    // let pixelData = ctx.getImageData(0, 0, width, height).data;
+    let args = ants[i].getContextArguments();
+    let pixelData = ctx.getImageData(args.x, args.y, args.w, args.h);
+    // ants[i].getTempContext(pixelData)
+    ants[i].getTempContextFromSmall(pixelData.data);
+    putPixel(ants[i].coord(), backgroundColor);
+    ants[i].chooseNextPath();
+    putPixel(ants[i].coord(), antColor);
   }
 
   let subt1 = performance.now();
   console.log("Global update took " + (subt1 - subt0) + " milliseconds.")
 }
 
+clearScreen(backgroundColor);
 for (var p = 0; p < runs; p++) {
   console.log('Setting timeout...');
   setTimeout(updateWorld, 300);
 }
-
-let t1 = performance.now();
-console.log("Took " + (t1 - t0) + " milliseconds.")

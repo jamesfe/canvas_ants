@@ -49,19 +49,16 @@ class Ant {
       for (var y = 0; y < this.contextSize; y++) {
         if (sameColor(this.tc[x][y], [0, 0, 0])) {
           // If there is nothing in this square, contemplate moving to it.
-          var cDist = getDistance(this.coord(), tgt.coord());
+          var cDist = getDistance({x: this.x + x, y: this.y + y}, tgt.coord());
           if (cDist < minDist) {
             moveOpt = {x: x, y: y};
             minDist = cDist;
           }
-        } else {
-          console.log(tc);
         }
       }
     }
-    if (minDist == this.maxDist) {
-      console.log('no available spaces');
-    }
+    moveOpt.x -= Math.floor(this.contextSize / 2);
+    moveOpt.y -= Math.floor(this.contextSize / 2);
     // Return the new coordinates to which we want to go
     return ({
       x: this.x + moveOpt.x,
@@ -102,6 +99,7 @@ class Ant {
   }
 
   getTempContext(pix) {
+    /* Given the whole screen of context, set the current ant's tiny context. */
     var sX = this.x - Math.floor(this.contextSize / 2);
     var sY = this.y - Math.floor(this.contextSize / 2);
     for (var tY = 0; tY < this.contextSize; tY++) {
@@ -114,6 +112,26 @@ class Ant {
         }
       }
     }
+  }
+
+  getTempContextFromSmall(smContext) {
+    /* From a small piece of context, set the current context. */
+    for (var x = 0; x < this.contextSize; x++) {
+      for (var y = 0; y < this.contextSize; y++) {
+        let start = ((y * this.contextSize) + x) * 4;
+        this.tc[x][y] = Array.from(smContext.slice(start, start + 4));
+      }
+    }
+  }
+
+  getContextArguments() {
+    /* Get the right x, y, height, and width to give to getImageData for context gathering. */
+    return ({
+      x: this.x - Math.floor(this.contextSize),
+      y: this.y - Math.floor(this.contextSize),
+      w: this.contextSize,
+      h: this.contextSize
+    });
   }
 }
 

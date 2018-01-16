@@ -1,6 +1,14 @@
+let t0 = performance.now();
+let antColor = [255, 255, 255];
+let targetColor = [255, 0, 0];
+let backgroundColor = [0, 0, 0];
 
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function sameColor(c1, c2) {
+  return (c1[0]===c2[0]) && (c1[1]===c2[1]) && (c1[2]===c2[2]);
 }
 
 function getDistance(p1, p2) {
@@ -10,8 +18,10 @@ function getDistance(p1, p2) {
   return Math.sqrt( a*a + b*b );
 }
 
-var runs = 50;
-// var runs = 5000;
+// var runs = 50;
+var runs = 3;
+var numAnts = 30;
+var runs = 500;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
 var width = canvas.width;
@@ -37,69 +47,6 @@ class GlobalTarget {
 }
 
 let contextSize = 3;
-
-class Ant {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-    this.tc = Array(contextSize).fill([]).map(x => Array(contextSize).fill(0));
-  }
-
-  coord() {
-    // console.log(this.x, this.y);
-    return {'x': this.x, 'y': this.y};
-  }
-
-  chooseNextPath() {
-    var choice = undefined;
-    if (getRandomInt(0, 3) === 0) {
-      choice = this.randomWalk()
-    } else {
-      choice = this.headToTarget()
-    }
-    this.x = choice.x;
-    this.y = choice.y;
-  }
-
-  randomWalk() {
-    return {
-      x: this.x + getRandomInt(-1, 1),
-      y: this.y + getRandomInt(-1, 1)
-    };
-  }
-
-  headToTarget() {
-    let tgt = this.findClosestTarget();
-    var dx = 0;
-    var dy = 0;
-    if (this.x < tgt.x) { dx = 1; }
-    if (this.x > tgt.x) { dx = -1; }
-    if (this.y < tgt.y) { dy = 1; }
-    if (this.y > tgt.y) { dy = -1; }
-
-    return {
-      x: this.x + dx,
-      y: this.y + dy
-    };
-  }
-
-  registerTargets(targets) {
-    this.targets = targets;
-  }
-
-  findClosestTarget() {
-    var minDist = getDistance({x: 0, y: 0}, {x: width, y: height});
-    var minTarget = undefined;
-    for (var t in this.targets) {
-      var dist = getDistance(this.coord(), this.targets[t].coord());
-      if (dist < minDist) {
-        minDist = dist;
-        minTarget = this.targets[t];
-      }
-    }
-    return(minTarget);
-  }
-}
 
 var globalTargets = [];
 for (var i = 0; i < 4; i++) {
@@ -130,29 +77,44 @@ function generateDistanceMap(targets, height, width) {
 }
 
 var ants = [];
-for (var i = 0; i < 10; i++) {
+console.log("Generating random ant locations.");
+for (var i = 0; i < numAnts; i++) {
   var randX = getRandomInt(0, width);
   var randY = getRandomInt(0, height);
-  console.log("Randoms: " + randX + " " + randY);
   ants.push(new Ant(randX, randY));
   ants[i].registerTargets(globalTargets);
 }
 
+function clearScreen(col) {
+  ctx.fillStyle = "rgba("+col[0]+","+col[1]+","+col[2]+",255)";
+  ctx.fillRect(0, 0, height, width);
+}
+
 function updateWorld() {
+
+  let subt0 = performance.now();
   console.log('Updating canvas.');
+
+  let pixelData = ctx.getImageData(0, 0, width, height).data;
+  clearScreen(backgroundColor);
   for (i in ants) {
-    console.log('Updating ant ' + i);
-    putPixel(ants[i].coord(), [0, 0, 0]);
+    ants[i].getTempContext(pixelData)
+    putPixel(ants[i].coord(), antColor);
     ants[i].chooseNextPath();
   }
 
   for (i in globalTargets) {
-    putPixel(globalTargets[i], [255, 0, 0]);
+    putPixel(globalTargets[i], targetColor);
   }
 
+  let subt1 = performance.now();
+  console.log("Global update took " + (subt1 - subt0) + " milliseconds.")
 }
 
 for (var p = 0; p < runs; p++) {
   console.log('Setting timeout...');
-  setTimeout(updateWorld, 500);
+  setTimeout(updateWorld, 300);
 }
+
+let t1 = performance.now();
+console.log("Took " + (t1 - t0) + " milliseconds.")

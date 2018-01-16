@@ -1,30 +1,39 @@
 class Ant {
 
   constructor(x, y) {
+    // Some things that should be static
+    this.contextSize = 3;
+    this.jitter = false;
+    this.jitterFactor = 3;
+
+    // Things that aren't static
     this.x = x;
     this.y = y;
-    this.contextSize = 3;
     this.maxDist = getDistance({x: 0, y: 0}, {x: width, y: height});
     this.tc = Array(this.contextSize).fill([]).map(x => Array(this.contextSize).fill(0));
   }
 
   coord() {
-    // console.log(this.x, this.y);
-    return {'x': this.x, 'y': this.y};
+    return {x: this.x, y: this.y};
   }
 
   chooseNextPath() {
-    var choice = undefined;
-    if (getRandomInt(0, 3) === 0) {
+    var choice = this.smartHeadToTarget();
+    if (this.jitter && getRandomInt(0, this.jitterFactor) === 0) {
       choice = this.randomWalk()
-    } else {
-      choice = this.smartHeadToTarget()
     }
-    this.x = choice.x;
-    this.y = choice.y;
+
+    // Check bounds and make move
+    if (choice.x >= 0 && choice.x <= width) {
+      this.x = choice.x;
+    }
+    if (choice.y >= 0 && choice.y <= width) {
+      this.y = choice.y;
+    }
   }
 
   randomWalk() {
+    /* Choose a random place to step into and return it. */
     return {
       x: this.x + getRandomInt(-1, 1),
       y: this.y + getRandomInt(-1, 1)
@@ -59,7 +68,6 @@ class Ant {
       y: this.y + moveOpt.y
     });
   }
-
 
   headToTarget() {
     let tgt = this.findClosestTarget();
@@ -98,8 +106,12 @@ class Ant {
     var sY = this.y - Math.floor(this.contextSize / 2);
     for (var tY = 0; tY < this.contextSize; tY++) {
       for (var tX = 0; tX < this.contextSize; tX++) {
-        let start = (((tY + sY) * width) + (tX + sX)) * 4;
-        this.tc[tX][tY] = Array.from(pix.slice(start, start + 4));
+        if (((sX + tX) >= 0) && ((sY + tY) >= 0)) {
+          let start = (((tY + sY) * width) + (tX + sX)) * 4;
+          this.tc[tX][tY] = Array.from(pix.slice(start, start + 4));
+        } else {
+          this.tc[tX][tY] = undefined;
+        }
       }
     }
   }

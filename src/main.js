@@ -21,6 +21,7 @@ function getDistance(p1, p2) {
 var runs = 10;
 var numAnts = 300;
 var runs = 50;;
+var numGlobalTargets = 3;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
 var width = canvas.width;
@@ -48,11 +49,13 @@ class GlobalTarget {
 let contextSize = 3;
 
 var globalTargets = [];
-for (var i = 0; i < 4; i++) {
+globalTargets.push(new GlobalTarget(width/2, height/2));
+/*
+for (var i = 0; i < numGlobalTargets; i++) {
   var randX = getRandomInt(0, width);
   var randY = getRandomInt(0, height);
   globalTargets.push(new GlobalTarget(randX, randY));
-}
+} */
 
 function generateDistanceMap(targets, height, width) {
   /* Returns a matrix keyed by [w][h] */
@@ -116,6 +119,11 @@ function updateWorld() {
 }
 
 clearScreen(backgroundColor);
+ctx.fillStyle = "rgba(255, 255, 0, 255)"
+ctx.fillRect(Math.floor(width/4), Math.floor(height/4), width/2, height/2)
+ctx.fillStyle = "rgba(0, 0, 0, 255)"
+ctx.fillRect(Math.floor(width/3), Math.floor(height/3), width/3, height/3)
+
 for (var p = 0; p < runs; p++) {
   console.log('Setting timeout...');
   setTimeout(updateWorld, 300);

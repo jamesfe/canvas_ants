@@ -19,8 +19,8 @@ function getDistance(p1, p2) {
 
 // var runs = 50;
 var runs = 10;
-var numAnts = 100;
-var runs = 50;;
+var numAnts = 50;
+var runs = 500;
 var numGlobalTargets = 3;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
@@ -32,6 +32,9 @@ function putPixel(coord, col) {
   ctx.fillRect(coord.x, coord.y, 1, 1 );
 }
 
+function sameCoord(c1, c2) {
+  return (c1.x === c2.x && c1.y === c2.y)
+}
 
 // setInterval(updateWorld, 100);
 
@@ -98,13 +101,14 @@ function updateWorld() {
     let pixelData = ctx.getImageData(args.x, args.y, args.w, args.h);
     // ants[i].getTempContext(pixelData)
     ants[i].getTempContextFromSmall(pixelData.data);
-    if (ants[i].coord().x == 0 && ants[i].coord().y == 0) {
-      console.log('zeros');
-      debugger;
-    }
-
     putPixel(ants[i].coord(), backgroundColor);
     ants[i].chooseNextPath();
+    if (typeof ants[i].biteTarget != 'undefined') {
+      let newColor = ants[i].biteTarget.color[0] - 3;
+      console.log("Biting, new color: ", newColor);
+      if (newColor < 0) { newColor = 0; } 
+      putPixel(ants[i].biteTarget.target, [newColor, newColor, 0, 255])
+    }
     putPixel(ants[i].coord(), antColor);
   }
 
@@ -120,5 +124,5 @@ ctx.fillRect(Math.floor(width/3), Math.floor(height/3), width/3, height/3)
 
 for (var p = 0; p < runs; p++) {
   console.log('Setting timeout...');
-  setTimeout(updateWorld, 2000 + (p * 100));
+  setTimeout(updateWorld, (p * 100));
 }

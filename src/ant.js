@@ -7,7 +7,7 @@ class Ant {
     this.jitterFactor = 3;
 
     // Things that aren't static
-    // this.history = [];
+    this.health = 100;
     this.x = x;
     this.y = y;
     this.maxDist = getDistance({x: 0, y: 0}, {x: width, y: height});
@@ -22,6 +22,14 @@ class Ant {
     var choice = this.smartHeadToTarget();
     if (this.jitter && getRandomInt(0, this.jitterFactor) === 0) {
       choice = this.randomWalk()
+    }
+
+    if (sameCoord(choice, this.coord())) {
+      console.log("staying put");
+      // Maybe we should bite something if it's nearby.
+      this.biteTarget = this.findBitingTargets();
+    } else {
+      this.biteTarget = undefined;
     }
 
     // Check bounds and make move
@@ -57,7 +65,6 @@ class Ant {
             y: this.y + (y - Math.floor(this.contextSize / 2))
           };
           // If there is nothing in this square, contemplate moving to it.
-          //var cDist = getDistance({x: this.x + x, y: this.y + y}, tgt.coord());
           var cDist = getDistance(moveOption, tgt.coord());
           if (cDist < minDist) {
             moveOpt = moveOption;;
@@ -66,16 +73,9 @@ class Ant {
         }
       }
     }
-    /*
-    if (minDist < this.MaxDist) {
-      moveOpt.x -= Math.floor(this.contextSize / 2);
-      moveOpt.y -= Math.floor(this.contextSize / 2);
+    if (minDist === this.maxDist) {
+      moveOpt = this.coord();
     }
-    // Return the new coordinates to which we want to go
-    return ({
-      x: this.x + moveOpt.x,
-      y: this.y + moveOpt.y
-    }); */
     return moveOpt;
   }
 
@@ -145,6 +145,31 @@ class Ant {
       w: this.contextSize,
       h: this.contextSize
     });
+  }
+
+  normalizeTempContext(x, y) {
+    /* Go from indices in our 3x3 matrix or whatever to a real coordinate */
+    return {
+      x: this.x - Math.floor(this.contextSize / 2) + x,
+      y: this.y - Math.floor(this.contextSize / 2) + y
+    }
+  }
+
+  findBitingTargets() {
+    for (var x = 0; x < this.contextSize; x++) {
+      for (var y = 0; y < this.contextSize; y++) {
+        debugger;
+        if (this.tc[x][y].length === 4 && this.tc[x][y][0] > 0 && this.tc[x][y][0] === this.tc[x][y][1]) {
+          // this is an adjacent yellow-shaded point, we should return it
+          console.log('finding a target');
+          return ({
+            color: this.tc[x][y],
+            target: this.normalizeTempContext(x, y)
+          });
+        }
+      }
+    }
+    return undefined;
   }
 }
 

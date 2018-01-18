@@ -7,6 +7,7 @@ class Ant {
     this.jitterFactor = 3;
 
     // Things that aren't static
+    // this.history = [];
     this.x = x;
     this.y = y;
     this.maxDist = getDistance({x: 0, y: 0}, {x: width, y: height});
@@ -24,10 +25,8 @@ class Ant {
     }
 
     // Check bounds and make move
-    if (choice.x >= 0 && choice.x <= width) {
+    if (choice.x >= 0 && choice.x <= width && choice.y >= 0 && choice.y <= width) {
       this.x = choice.x;
-    }
-    if (choice.y >= 0 && choice.y <= width) {
       this.y = choice.y;
     }
   }
@@ -61,7 +60,6 @@ class Ant {
           //var cDist = getDistance({x: this.x + x, y: this.y + y}, tgt.coord());
           var cDist = getDistance(moveOption, tgt.coord());
           if (cDist < minDist) {
-            // moveOpt = {x: x, y: y};
             moveOpt = moveOption;;
             minDist = cDist;
           }
@@ -78,7 +76,7 @@ class Ant {
       x: this.x + moveOpt.x,
       y: this.y + moveOpt.y
     }); */
-    return moveOption;
+    return moveOpt;
   }
 
   headToTarget() {

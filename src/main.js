@@ -19,7 +19,7 @@ function getDistance(p1, p2) {
 
 // var runs = 50;
 var runs = 10;
-var numAnts = 300;
+var numAnts = 100;
 var runs = 50;;
 var numGlobalTargets = 3;
 var canvas = document.getElementById('canvas');
@@ -98,6 +98,11 @@ function updateWorld() {
     let pixelData = ctx.getImageData(args.x, args.y, args.w, args.h);
     // ants[i].getTempContext(pixelData)
     ants[i].getTempContextFromSmall(pixelData.data);
+    if (ants[i].coord().x == 0 && ants[i].coord().y == 0) {
+      console.log('zeros');
+      debugger;
+    }
+
     putPixel(ants[i].coord(), backgroundColor);
     ants[i].chooseNextPath();
     putPixel(ants[i].coord(), antColor);
@@ -115,5 +120,5 @@ ctx.fillRect(Math.floor(width/3), Math.floor(height/3), width/3, height/3)
 
 for (var p = 0; p < runs; p++) {
   console.log('Setting timeout...');
-  setTimeout(updateWorld, 300);
+  setTimeout(updateWorld, 2000 + (p * 100));
 }

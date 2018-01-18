@@ -35,21 +35,10 @@ function putPixel(coord, col) {
 
 // setInterval(updateWorld, 100);
 
-class GlobalTarget {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-  }
-
-  coord() {
-    return {'x': this.x, 'y': this.y};
-  }
-}
-
 let contextSize = 3;
 
 var globalTargets = [];
-globalTargets.push(new GlobalTarget(width/2, height/2));
+globalTargets.push(new Target(width/2, height/2));
 /*
 for (var i = 0; i < numGlobalTargets; i++) {
   var randX = getRandomInt(0, width);

@@ -20,7 +20,7 @@ function getDistance(p1, p2) {
 // var runs = 50;
 var runs = 10;
 var numAnts = 50;
-var runs = 500;
+var runs = 5000;
 var numGlobalTargets = 3;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
@@ -28,7 +28,7 @@ var width = canvas.width;
 var ctx = canvas.getContext('2d');
 
 function putPixel(coord, col) {
-  ctx.fillStyle = "rgba("+col[0]+","+col[1]+","+col[2]+",128)";
+  ctx.fillStyle = "rgba("+col[0]+","+col[1]+","+col[2]+",255)";
   ctx.fillRect(coord.x, coord.y, 1, 1 );
 }
 
@@ -74,7 +74,7 @@ var ants = [];
 console.log("Generating random ant locations.");
 for (var i = 0; i < numAnts; i++) {
   var randX = getRandomInt(0, width);
-  var randY = getRandomInt(0, height);
+  var randY = getRandomInt(0, 10);
   ants.push(new Ant(randX, randY));
   ants[i].registerTargets(globalTargets);
 }
@@ -104,9 +104,9 @@ function updateWorld() {
     putPixel(ants[i].coord(), backgroundColor);
     ants[i].chooseNextPath();
     if (typeof ants[i].biteTarget != 'undefined') {
-      let newColor = ants[i].biteTarget.color[0] - 3;
-      console.log("Biting, new color: ", newColor);
-      if (newColor < 0) { newColor = 0; } 
+      let newColor = ants[i].biteTarget.color[0] - 15;
+      // console.log("Biting, new color: ", newColor, ants[i].biteTarget.target);
+      if (newColor < 0) { newColor = 0; }
       putPixel(ants[i].biteTarget.target, [newColor, newColor, 0, 255])
     }
     putPixel(ants[i].coord(), antColor);
@@ -124,5 +124,5 @@ ctx.fillRect(Math.floor(width/3), Math.floor(height/3), width/3, height/3)
 
 for (var p = 0; p < runs; p++) {
   console.log('Setting timeout...');
-  setTimeout(updateWorld, (p * 100));
+  setTimeout(updateWorld, 1000 + (p * 50));
 }

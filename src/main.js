@@ -37,6 +37,39 @@ function sameCoord(c1, c2) {
   return (c1.x === c2.x && c1.y === c2.y)
 }
 
+function getEdgeCoordinate() {
+  /* Get a random edge coordinate. */
+  // TODO: Depends on height, width
+  var randX, randY;
+  switch (getRandomInt(0, 3)) {
+    case 0: // top
+      randX = 0;
+      randY = getRandomInt(0, height);
+      break;
+    case 1: // bottom
+      randX = width;
+      randY = getRandomInt(0, height);
+      break;
+    case 2: // left
+      randY = 0;
+      randX = getRandomInt(0, width);
+      break;
+    case 3: // right
+      randY = height;
+      randX = getRandomInt(0, width);
+      break;
+  }
+  return ({x: randX, y: randY});
+}
+
+function getRandomCoordinate() {
+  /* Get a random coordinate. */
+  // TODO: Depends on height, width
+  var randX = getRandomInt(0, width);
+  var randY = getRandomInt(0, height);
+  return ({x: randX, y: randY});
+}
+
 // setInterval(updateWorld, 100);
 
 let contextSize = 3;
@@ -45,9 +78,8 @@ var globalTargets = [];
 globalTargets.push(new Target(width/2, height/2));
 /*
 for (var i = 0; i < numGlobalTargets; i++) {
-  var randX = getRandomInt(0, width);
-  var randY = getRandomInt(0, height);
-  globalTargets.push(new GlobalTarget(randX, randY));
+  let c = getRandomCoordinate();
+  globalTargets.push(new Target(c.x, c.y));
 } */
 
 function generateDistanceMap(targets, height, width) {
@@ -74,21 +106,25 @@ function generateDistanceMap(targets, height, width) {
 var ants = [];
 console.log("Generating random ant locations.");
 for (var i = 0; i < numAnts; i++) {
-  var randX = getRandomInt(0, width);
-  var randY = getRandomInt(0, 10);
-  ants.push(new Ant(randX, randY));
+  let c = getEdgeCoordinate();
+  ants.push(new Ant(c.x, c.y));
   ants[i].registerTargets(globalTargets);
 }
 
 function clearScreen(col) {
   ctx.fillStyle = "rgba("+col[0]+","+col[1]+","+col[2]+",255)";
-  ctx.fillRect(0, 0, height, width);
+  ctx.fillRect(0, 0, width, height);
 }
 
 
 
 function updateWorld() {
-  // debugger;
+  if (getRandomInt(0, 20) === 0) {
+    let c = getEdgeCoordinate();
+    let a = new Ant(c.x, c.y);
+    a.registerTargets(globalTargets);
+    ants.push(a);
+  }
   let subt0 = performance.now();
 
   // clearScreen(backgroundColor);

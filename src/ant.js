@@ -168,6 +168,7 @@ class Ant {
   }
 
   findBitingTargets() {
+    var options = [];
     for (var x = 0; x < this.contextSize; x++) {
       for (var y = 0; y < this.contextSize; y++) {
         let col = this.tc[x][y];
@@ -175,12 +176,15 @@ class Ant {
         // if (this.tc[x][y].length === 4 && this.tc[x][y][0] > 0 && this.tc[x][y][0] === this.tc[x][y][1]) {
           // this is an adjacent yellow-shaded point, we should return it
           // console.log('finding a target');
-          return ({
+          options.push({
             color: this.tc[x][y],
             target: this.normalizeTempContext(x, y)
           });
         }
       }
+    }
+    if (options.length > 0) {
+      return (options[getRandomInt(0, options.length - 1)]);
     }
     return undefined;
   }

@@ -12,6 +12,7 @@ class Ant {
     this.y = y;
     this.maxDist = getDistance({x: 0, y: 0}, {x: width, y: height});
     this.tc = Array(this.contextSize).fill([]).map(x => Array(this.contextSize).fill(0));
+    this.history = [];
   }
 
   coord() {
@@ -19,23 +20,33 @@ class Ant {
   }
 
   chooseNextPath() {
+    this.biteTarget = undefined;
     var choice = this.smartHeadToTarget();
     if (this.jitter && getRandomInt(0, this.jitterFactor) === 0) {
+      // TODO: This code just hacks through walls, it needs to be fixed. Until then jitter=true is a bug
       choice = this.randomWalk()
     }
 
     if (sameCoord(choice, this.coord())) {
-      console.log("staying put");
+      // console.log("staying put");
       // Maybe we should bite something if it's nearby.
       this.biteTarget = this.findBitingTargets();
-    } else {
-      this.biteTarget = undefined;
     }
 
     // Check bounds and make move
     if (choice.x >= 0 && choice.x <= width && choice.y >= 0 && choice.y <= width) {
-      this.x = choice.x;
-      this.y = choice.y;
+      // Keep the last few moves to prevent jitter. (and for debugging)
+      this.history.push({x: this.x, y: this.y});
+      let hl = this.history.length;
+      if (hl > 3) {
+        this.history = this.history.slice(hl - 3, hl);
+      }
+      if (hl < 3 || !sameCoord(choice, this.history[1])) {
+        this.x = choice.x;
+        this.y = choice.y;
+      } else {
+        this.biteTarget = this.findBitingTargets();
+      }
     }
   }
 
@@ -50,7 +61,8 @@ class Ant {
   smartHeadToTarget() {
     /* Check local context and pick the closest available square to move to the center */
     let tgt = this.findClosestTarget();
-    if (getDistance(this.coord(), tgt.coord()) <= 1.5) {
+    /* If we are one block away, no need to jitter. */
+    if (getDistance(this.coord(), tgt.coord()) <= 1.3) {
       // Stop moving.
       return this.coord();
     }

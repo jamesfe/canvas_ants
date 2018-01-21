@@ -3,7 +3,8 @@ let targetColor = [255, 0, 0];
 let backgroundColor = [0, 0, 0];
 
 function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  /* Returns a random number, inclusive of min and max */
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function sameColor(c1, c2) {
@@ -124,5 +125,5 @@ ctx.fillRect(Math.floor(width/3), Math.floor(height/3), width/3, height/3)
 
 for (var p = 0; p < runs; p++) {
   console.log('Setting timeout...');
-  setTimeout(updateWorld, 1000 + (p * 50));
+  setTimeout(updateWorld, p);
 }

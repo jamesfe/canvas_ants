@@ -12,6 +12,7 @@ var canvas = document.getElementById('canvas');
 var height = canvas.height;
 var width = canvas.width;
 var ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
 
 function putPixel(coord, col) {
   ctx.fillStyle = "rgba("+col[0]+","+col[1]+","+col[2]+",255)";
@@ -26,9 +27,42 @@ function clearScreen(col) {
 let contextSize = 3;
 var globalTargets = initialGlobalTargets(height, width, true);
 var ants = initialAnts(height, width, globalTargets);
+var gMap = Array(height).fill([]).map(x => Array(width).fill(0));
+
+/*
+ * What is faster? all gMap or all canvas?
+ * I think it's certainly faster to read the gMap
+ * It may also be faster to draw from the gMap
+ *
+ * What do we need to do to make the migration?
+ * 1. We need a way to tranform gmap -> image and image -> gmap
+ * 2. We have to have a function to read the initial image and turn it into a gmap
+ * 3. We must draw the gmap
+ * 4. We have to transform our "read to temp context" functions too
+ *
+ *
+ * What is the flow?
+ * 1. Get the current state of the gMap
+ * 2. For each ant, plot your move and then un-plot the previous position
+ * 3. At the end, from the gMap we will draw the canvas
+ * */
+
+function imageDataToMatrix(id) {
+
+}
+
+function drawImageData() {
+  clearScreen(backgroundColor);
+  gMap.forEach( row => {
+    row.forEach( pix => {
+         
+    });
+  });
+}
 
 
 function updateWorld() {
+  /* Add a random ant sometimes */
   if (getRandomInt(0, 20) === 0) {
     let c = getEdgeCoordinate(height, width);
     let a = new Ant(c.x, c.y);

@@ -1,3 +1,6 @@
+import { Target } from './target.js';
+import { Ant } from './ant.js';
+
 function getRandomInt(min, max) {
   /* Returns a random number, inclusive of min and max */
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -7,7 +10,7 @@ function sameColor(c1, c2) {
   return (typeof c1 !== 'undefined' && typeof c2 !== 'undefined' && c1[0]===c2[0] && c1[1]===c2[1] && c1[2]===c2[2]);
 }
 
-function getDistance(p1, p2) {
+export function getDistance(p1, p2) {
   var a = p1.x - p2.x;
   var b = p1.y - p2.y;
 
@@ -50,7 +53,7 @@ function getRandomCoordinate(h, w) {
   return ({x: randX, y: randY});
 }
 
-function initialGlobalTargets(h, w, debug) {
+export function initialGlobalTargets(h, w, debug) {
   /* Generate some random targets but otherwise just put one in the middle for debug mode */
   var tgts = [];
   if (debug === true) {
@@ -64,11 +67,11 @@ function initialGlobalTargets(h, w, debug) {
   return (tgts);
 }
 
-function initialAnts(h, w, tgts, type) {
+export function initialAnts(h, w, tgts, type, num) {
   /* Generate some initial ants */
   var a = [];
   var c = {x: 0, y: 0};
-  for (var i = 0; i < numAnts; i++) {
+  for (var i = 0; i < num; i++) {
     switch (type) {
       case "edge":
         c = getEdgeCoordinate(height, width);
@@ -77,7 +80,7 @@ function initialAnts(h, w, tgts, type) {
         c = getRandomCoordinate(h, w);
         break
       }
-    a.push(new Ant(c.x, c.y));
+    a.push(new Ant(c.x, c.y, w, h));
     a[i].registerTargets(tgts);
   }
   return (a);

@@ -1,17 +1,21 @@
-class Ant {
+import {getDistance} from './utils.js';
 
-  constructor(x, y) {
+export class Ant {
+
+  constructor(x, y, maxX, maxY) {
     // Some things that should be static
     this.contextSize = 3;
     this.jitter = false;
     this.jitterFactor = 3;
 
     // Things that aren't static
+    this.maxX = maxX;
+    this.maxY = maxY;
     this.speedPerTick = 1; // TODO: Integrate this into movement.
     this.health = 100;
     this.x = x;
     this.y = y;
-    this.maxDist = getDistance({x: 0, y: 0}, {x: width, y: height});
+    this.maxDist = getDistance({x: 0, y: 0}, {x: maxX, y: maxY});
     this.tc = Array(this.contextSize).fill([]).map(x => Array(this.contextSize).fill(0));
     this.history = [];
   }
@@ -35,7 +39,7 @@ class Ant {
     }
 
     // Check bounds and make move
-    if (choice.x >= 0 && choice.x <= width && choice.y >= 0 && choice.y <= width) {
+    if (choice.x >= 0 && choice.x <= maxX && choice.y >= 0 && choice.y <= maxY) {
       // Keep the last few moves to prevent jitter. (and for debugging)
       this.history.push({x: this.x, y: this.y});
       let hl = this.history.length;
@@ -131,7 +135,7 @@ class Ant {
     for (var tY = 0; tY < this.contextSize; tY++) {
       for (var tX = 0; tX < this.contextSize; tX++) {
         if (((sX + tX) >= 0) && ((sY + tY) >= 0)) {
-          let start = (((tY + sY) * width) + (tX + sX)) * 4;
+          let start = (((tY + sY) * this.maxX) + (tX + sX)) * 4;
           this.tc[tX][tY] = Array.from(pix.slice(start, start + 4));
         } else {
           this.tc[tX][tY] = undefined;

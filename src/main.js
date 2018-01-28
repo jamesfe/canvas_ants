@@ -1,3 +1,7 @@
+import { initialAnts, initialGlobalTargets } from './utils.js';
+import { Ant } from './ant.js';
+import { Target } from './target.js';
+
 let antColor = [255, 255, 255];
 let targetColor = [255, 0, 0];
 let backgroundColor = [0, 0, 0];
@@ -21,23 +25,23 @@ var ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
 function putPixel(coord, col) {
-  ctx.fillStyle = "rgba("+col[0]+","+col[1]+","+col[2]+",255)";
+  ctx.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+',255)';
   ctx.fillRect(coord.x, coord.y, 1, 1 );
 }
 
 function putSizedPixel(coord, col, s) {
-  ctx.fillStyle = "rgba("+col[0]+","+col[1]+","+col[2]+",255)";
+  ctx.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+',255)';
   ctx.fillRect(coord.x * s, coord.y * s, s, s);
 }
 
 function clearScreen(col) {
-  ctx.fillStyle = "rgba("+col[0]+","+col[1]+","+col[2]+",255)";
+  ctx.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+',255)';
   ctx.fillRect(0, 0, width, height);
 }
 
 let contextSize = 3;
 var globalTargets = initialGlobalTargets(gHeight, gWidth, true);
-var ants = initialAnts(gHeight, gWidth, globalTargets, "rand");
+var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
 
 // This is the 'presence matrix', it has different codes for different items (ant, wall, etc)
 var pMat = Array(gHeight).fill([]).map(x => Array(gWidth).fill(0));
@@ -45,7 +49,7 @@ var pMat = Array(gHeight).fill([]).map(x => Array(gWidth).fill(0));
 function newMat(h, w) { return (new Array(h).fill([]).map(x => Array(w).fill(0)));}
 
 
-var wallItems = []
+var wallItems = [];
 
 function buildWallItems(w, h) {
   /* Act on wallItems array as a side-effect */
@@ -128,7 +132,7 @@ ctx.fillStyle = "rgba(0, 0, 0, 255)"
 ctx.fillRect(Math.floor(width/3), Math.floor(height/3), width/3, height/3)
 */
 
-
+console.log('running');
 // setInterval(updateWorld, 100);
 for (var p = 0; p < runs; p++) {
   console.log('Setting timeout...');

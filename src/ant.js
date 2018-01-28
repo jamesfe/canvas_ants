@@ -7,6 +7,7 @@ class Ant {
     this.jitterFactor = 3;
 
     // Things that aren't static
+    this.speedPerTick = 1; // TODO: Integrate this into movement.
     this.health = 100;
     this.x = x;
     this.y = y;

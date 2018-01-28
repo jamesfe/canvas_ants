@@ -54,21 +54,29 @@ function initialGlobalTargets(h, w, debug) {
   /* Generate some random targets but otherwise just put one in the middle for debug mode */
   var tgts = [];
   if (debug === true) {
-    tgts.push(new Target(width/2, height/2));
+    tgts.push(new Target(w/2, h/2));
   } else {
     for (var i = 0; i < numGlobalTargets; i++) {
-      let c = getRandomCoordinate(height, width);
+      let c = getRandomCoordinate(h, w);
       tgts.push(new Target(c.x, c.y));
     }
   }
   return (tgts);
 }
 
-function initialAnts(h, w, tgts) {
+function initialAnts(h, w, tgts, type) {
   /* Generate some initial ants */
   var a = [];
+  var c = {x: 0, y: 0};
   for (var i = 0; i < numAnts; i++) {
-    let c = getEdgeCoordinate(height, width);
+    switch (type) {
+      case "edge":
+        c = getEdgeCoordinate(height, width);
+        break
+      case "rand":
+        c = getRandomCoordinate(h, w);
+        break
+      }
     a.push(new Ant(c.x, c.y));
     a[i].registerTargets(tgts);
   }

@@ -2,7 +2,7 @@ import {getDistance} from './utils.js';
 
 export class Ant {
 
-  constructor(x, y, maxX, maxY) {
+  constructor(x, y, maxX, maxY, tick) {
     // Some things that should be static
     this.contextSize = 3;
     this.jitter = false;
@@ -12,6 +12,7 @@ export class Ant {
     this.maxX = maxX;
     this.maxY = maxY;
     this.speedPerTick = 1; // TODO: Integrate this into movement.
+    this.lastTick = undefined || 0;
     this.health = 100;
     this.x = x;
     this.y = y;
@@ -94,21 +95,6 @@ export class Ant {
       moveOpt = this.coord();
     }
     return moveOpt;
-  }
-
-  headToTarget() {
-    let tgt = this.findClosestTarget();
-    var dx = 0;
-    var dy = 0;
-    if (this.x < tgt.x) { dx = 1; }
-    if (this.x > tgt.x) { dx = -1; }
-    if (this.y < tgt.y) { dy = 1; }
-    if (this.y > tgt.y) { dy = -1; }
-
-    return {
-      x: this.x + dx,
-      y: this.y + dy
-    };
   }
 
   registerTargets(targets) {

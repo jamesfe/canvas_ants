@@ -1,4 +1,4 @@
-import {getDistance} from './utils.js';
+import {getDistance, getRandomInt, sameCoord, sameColor} from './utils.js';
 
 export class Ant {
 
@@ -30,7 +30,7 @@ export class Ant {
     var choice = this.smartHeadToTarget();
     if (this.jitter && getRandomInt(0, this.jitterFactor) === 0) {
       // TODO: This code just hacks through walls, it needs to be fixed. Until then jitter=true is a bug
-      choice = this.randomWalk()
+      choice = this.randomWalk();
     }
 
     if (sameCoord(choice, this.coord())) {
@@ -40,7 +40,7 @@ export class Ant {
     }
 
     // Check bounds and make move
-    if (choice.x >= 0 && choice.x <= maxX && choice.y >= 0 && choice.y <= maxY) {
+    if (choice.x >= 0 && choice.x <= this.maxX && choice.y >= 0 && choice.y <= this.maxY) {
       // Keep the last few moves to prevent jitter. (and for debugging)
       this.history.push({x: this.x, y: this.y});
       let hl = this.history.length;
@@ -85,7 +85,7 @@ export class Ant {
           // If there is nothing in this square, contemplate moving to it.
           var cDist = getDistance(moveOption, tgt.coord());
           if (cDist < minDist) {
-            moveOpt = moveOption;;
+            moveOpt = moveOption;
             minDist = cDist;
           }
         }
@@ -152,10 +152,10 @@ export class Ant {
 
   normalizeTempContext(x, y) {
     /* Go from indices in our 3x3 matrix or whatever to a real coordinate */
-    return {
+    return ({
       x: this.x - Math.floor(this.contextSize / 2) + x,
       y: this.y - Math.floor(this.contextSize / 2) + y
-    }
+    });
   }
 
   findBitingTargets() {

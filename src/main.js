@@ -1,6 +1,4 @@
 import { initialAnts, initialGlobalTargets } from './utils.js';
-import { Ant } from './ant.js';
-import { Target } from './target.js';
 
 let antColor = [255, 255, 255];
 let targetColor = [255, 0, 0];
@@ -9,10 +7,8 @@ let wallColor = [255, 255, 0];
 
 
 var factor = 4;
-// var runs = 50;
 var runs = 10;
 var numAnts = 50;
-var runs = 50;
 var numGlobalTargets = 3;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
@@ -24,11 +20,6 @@ var gWidth = Math.floor(canvas.width / factor);
 var ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-function putPixel(coord, col) {
-  ctx.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+',255)';
-  ctx.fillRect(coord.x, coord.y, 1, 1 );
-}
-
 function putSizedPixel(coord, col, s) {
   ctx.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+',255)';
   ctx.fillRect(coord.x * s, coord.y * s, s, s);
@@ -39,22 +30,15 @@ function clearScreen(col) {
   ctx.fillRect(0, 0, width, height);
 }
 
-let contextSize = 3;
-var globalTargets = initialGlobalTargets(gHeight, gWidth, true);
+var globalTargets = initialGlobalTargets(gHeight, gWidth, numGlobalTargets, true);
 var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
-
-// This is the 'presence matrix', it has different codes for different items (ant, wall, etc)
-var pMat = Array(gHeight).fill([]).map(x => Array(gWidth).fill(0));
-
-function newMat(h, w) { return (new Array(h).fill([]).map(x => Array(w).fill(0)));}
-
 
 var wallItems = [];
 
 function buildWallItems(w, h) {
   /* Act on wallItems array as a side-effect */
   for (var x = 0; x < w; x ++) {
-    for (var y = 0; y < w; y ++) {
+    for (var y = 0; y < h; y ++) {
       if ((y > 80 && y < 100) || (y > 180 && y < 200)) {
         wallItems.push({x: x, y: y});
       }
@@ -132,9 +116,7 @@ ctx.fillStyle = "rgba(0, 0, 0, 255)"
 ctx.fillRect(Math.floor(width/3), Math.floor(height/3), width/3, height/3)
 */
 
-console.log('running');
 // setInterval(updateWorld, 100);
 for (var p = 0; p < runs; p++) {
-  console.log('Setting timeout...');
   setTimeout(updateWorld, p, p);
 }

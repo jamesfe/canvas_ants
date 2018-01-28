@@ -1,6 +1,7 @@
 let antColor = [255, 255, 255];
 let targetColor = [255, 0, 0];
 let backgroundColor = [0, 0, 0];
+let wallColor = [255, 255, 0];
 
 
 var factor = 4;
@@ -46,17 +47,17 @@ function newMat(h, w) { return (new Array(h).fill([]).map(x => Array(w).fill(0))
 
 var wallItems = []
 
-
 function buildWallItems(w, h) {
   /* Act on wallItems array as a side-effect */
-  Array(w).keys().forEach(x => {
-    Array(h).keys().forEach(y =>  {
-      if ((row > 200 && row < 250) || (row > 600 && row < 700)) {
+  for (var x = 0; x < w; x ++) {
+    for (var y = 0; y < w; y ++) {
+      if ((y > 80 && y < 100) || (y > 180 && y < 200)) {
         wallItems.push({x: x, y: y});
       }
-    })
-  });
+    }
+  }
 }
+buildWallItems(gWidth, gHeight);
 
 function imageDataToMatrix(id) {
   /* Convert an image to a presence matrix (easy detection of walls, maybe) */
@@ -115,7 +116,7 @@ function drawWorld() {
   clearScreen(backgroundColor);
   globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, factor));
   ants.forEach(x => putSizedPixel(x.coord(), antColor, factor));
-  wallItems.forEach(x => putSizedPixel(x.coord(), wallColor, factor));
+  wallItems.forEach(x => putSizedPixel(x, wallColor, factor));
 }
 
 /*

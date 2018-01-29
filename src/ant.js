@@ -48,6 +48,13 @@ export class Ant {
         this.history = this.history.slice(hl - 3, hl);
       }
       if (hl < 3 || !sameCoord(choice, this.history[1])) {
+        /* TODO: This should check our ticks and see how far we can go?? (but really, we can only go one square in
+         * any direction per tick, so is it necessary?
+         *
+         * Maybe for a bullet it's more necessary because they have to go multiple squares and should check each
+         * square as they go.
+         *
+         */
         this.x = choice.x;
         this.y = choice.y;
       } else {
@@ -141,7 +148,8 @@ export class Ant {
   }
 
   getContextArguments() {
-    /* Get the right x, y, height, and width to give to getImageData for context gathering. */
+    /* Get the right x, y, height, and width to give to getImageData for context gathering.
+     * In other words, get a NxN square around our coordinate, pass the upper left and w/h back. */
     return ({
       x: this.x - Math.floor(this.contextSize / 2),
       y: this.y - Math.floor(this.contextSize / 2),

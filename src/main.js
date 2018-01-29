@@ -1,5 +1,10 @@
 import { initialAnts, initialGlobalTargets } from './utils.js';
 
+let COLORS = {
+  WALL: 1,
+  ANT: 2
+};
+
 let antColor = [255, 255, 255];
 let targetColor = [255, 0, 0];
 let backgroundColor = [0, 0, 0];
@@ -66,6 +71,16 @@ function drawImageData() {
 
 function updateWorld(tick) {
   /* Add a random ant sometimes */
+  var globalMap = newMat(gHeight, gWidth);
+  // Register on global map
+  wallItems.forEach(x => globalMap[x.x][x.y] = COLORS.WALL; );
+  ants.forEach(x => globalMap[x.x][x.y] = COLORS.ANT; );
+
+  // Now make some moves
+  ants.forEach(x => {
+
+  });
+
   /*
   if (getRandomInt(0, 20) === 0) {
     let c = getEdgeCoordinate(height, width);
@@ -78,10 +93,8 @@ function updateWorld(tick) {
   // clearScreen(backgroundColor);
 
   for (i in ants) {
-    // let pixelData = ctx.getImageData(0, 0, width, height).data;
     let args = ants[i].getContextArguments();
     let pixelData = ctx.getImageData(args.x, args.y, args.w, args.h);
-    // ants[i].getTempContext(pixelData)
     ants[i].getTempContextFromSmall(pixelData.data);
     putPixel(ants[i].coord(), backgroundColor);
     ants[i].chooseNextPath();

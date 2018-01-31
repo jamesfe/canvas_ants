@@ -84,18 +84,6 @@ function imageDataToMatrix(id) {
 
 }
 
-/*
-function drawImageData() {
-  clearScreen(backgroundColor);
-  gMap.forEach( row => {
-    row.forEach( pix => {
-
-    });
-  });
-}
-*/
-
-
 function updateWorld(tick) {
   /* Add a random ant sometimes */
   var globalMap = newMat(gHeight, gWidth);
@@ -105,7 +93,11 @@ function updateWorld(tick) {
 
   // Now make some moves
   ants.forEach(ant => {
+    // Remove ant from the globalMap
     ant.updateTc(getValidMoveSites(getMoveOptions(ant.coord()), gHeight, gWidth, globalMap));
+    ant.chooseNextPath();
+    // Make the move
+    // Add the ant to the map
   });
 
   /*

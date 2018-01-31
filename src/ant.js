@@ -90,23 +90,14 @@ export class Ant {
     var moveOpt = {x: 0, y: 0};
     /* The code below summarized:
     * Find a place that is closest to the target. */
-    // TODO: Replace this code with a filter on the temp context. 
-    for (var x = 0; x < this.contextSize; x++) {
-      for (var y = 0; y < this.contextSize; y++) {
-        if (sameColor(this.tc[x][y], [0, 0, 0])) {
-          moveOption = {
-            x: this.x + (x - Math.floor(this.contextSize / 2)),
-            y: this.y + (y - Math.floor(this.contextSize / 2))
-          };
-          // If there is nothing in this square, contemplate moving to it.
-          var cDist = getDistance(moveOption, tgt.coord());
-          if (cDist < minDist) {
-            moveOpt = moveOption;
-            minDist = cDist;
-          }
-        }
-      }
+    if (this.tc != undefined) {
+      this.tc.map(c => {
+        c.distance = getDistance(this.coord(), c.coord);
+        return(c);
+      });
     }
+    // TODO: Get the minimum value from this (reduce)
+    // then, set moveOpt
     if (minDist === this.maxDist) {
       moveOpt = this.coord();
     }

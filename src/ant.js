@@ -25,6 +25,11 @@ export class Ant {
     return {x: this.x, y: this.y};
   }
 
+  makeMove(choice) {
+    /* Do the necessary checks and iterate ourselves by the number of ticks in the specified direction. */
+    console.log('TODO MOVE!');
+  }
+
   chooseNextPath() {
     this.biteTarget = undefined;
     var choice = this.smartHeadToTarget();
@@ -61,6 +66,7 @@ export class Ant {
         this.biteTarget = this.findBitingTargets();
       }
     }
+    this.makeMove(choice);
   }
 
   randomWalk() {
@@ -82,6 +88,9 @@ export class Ant {
     var moveOption = this.coord();
     var minDist = this.maxDist;
     var moveOpt = {x: 0, y: 0};
+    /* The code below summarized:
+    * Find a place that is closest to the target. */
+    // TODO: Replace this code with a filter on the temp context. 
     for (var x = 0; x < this.contextSize; x++) {
       for (var y = 0; y < this.contextSize; y++) {
         if (sameColor(this.tc[x][y], [0, 0, 0])) {
@@ -108,6 +117,10 @@ export class Ant {
     this.targets = targets;
   }
 
+  updateTc(data) {
+    this.tc = data.map(x => x);
+  }
+
   findClosestTarget() {
     var minDist = this.maxDist;
     var minTarget = undefined;
@@ -121,22 +134,7 @@ export class Ant {
     return(minTarget);
   }
 
-  getTempContext(pix) {
-    /* Given the whole screen of context, set the current ant's tiny context. */
-    var sX = this.x - Math.floor(this.contextSize / 2);
-    var sY = this.y - Math.floor(this.contextSize / 2);
-    for (var tY = 0; tY < this.contextSize; tY++) {
-      for (var tX = 0; tX < this.contextSize; tX++) {
-        if (((sX + tX) >= 0) && ((sY + tY) >= 0)) {
-          let start = (((tY + sY) * this.maxX) + (tX + sX)) * 4;
-          this.tc[tX][tY] = Array.from(pix.slice(start, start + 4));
-        } else {
-          this.tc[tX][tY] = undefined;
-        }
-      }
-    }
-  }
-
+  /* TODO: DELETE */
   getTempContextFromSmall(smContext) {
     /* From a small piece of context, set the current context. */
     for (var x = 0; x < this.contextSize; x++) {
@@ -147,6 +145,7 @@ export class Ant {
     }
   }
 
+  /* TODO: DELETE */
   getContextArguments() {
     /* Get the right x, y, height, and width to give to getImageData for context gathering.
      * In other words, get a NxN square around our coordinate, pass the upper left and w/h back. */

@@ -1,4 +1,4 @@
-import { initialAnts, initialGlobalTargets } from './utils.js';
+import { initialAnts, initialGlobalTargets, newMat } from './utils.js';
 
 let COLORS = {
   WALL: 1,
@@ -24,6 +24,33 @@ var gWidth = Math.floor(canvas.width / factor);
 
 var ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
+
+function getMoveOptions(coord) {
+  /* Given a {x: 1, y: 2} style object, find the adjacent cells. */
+  let x = coord.x;
+  let y = coord.y;
+  var retVals = [];
+  retVals.push({x: x - 1, y: y + 1});
+  retVals.push({x: x - 1, y: y});
+  retVals.push({x: x - 1, y: y - 1});
+  retVals.push({x: x, y: y + 1});
+  retVals.push({x: x, y: y}); // center
+  retVals.push({x: x, y: y - 1});
+  retVals.push({x: x + 1, y: y + 1});
+  retVals.push({x: x + 1, y: y});
+  retVals.push({x: x + 1, y: y - 1});
+  return (retVals);
+}
+
+function getValidMoveSites(inArr, h, w, matrix) {
+  /* Given a matrix from getMoveOptions, check the matrix for valid moves. */
+  let validLocs = inArr
+    .filter(a => a.x >= 0 && a.x <= w && a.y >= 0 && a.y <= h)
+    .map(a => { return ({color: matrix[a.x][a.y], coord: a}); })
+    .filter(a => a.color != COLORS.WALL);
+  return (validLocs);
+}
+
 
 function putSizedPixel(coord, col, s) {
   ctx.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+',255)';
@@ -73,12 +100,12 @@ function updateWorld(tick) {
   /* Add a random ant sometimes */
   var globalMap = newMat(gHeight, gWidth);
   // Register on global map
-  wallItems.forEach(x => globalMap[x.x][x.y] = COLORS.WALL; );
-  ants.forEach(x => globalMap[x.x][x.y] = COLORS.ANT; );
+  wallItems.forEach(x => globalMap[x.x][x.y] = COLORS.WALL);
+  ants.forEach(x => globalMap[x.x][x.y] = COLORS.ANT);
 
   // Now make some moves
-  ants.forEach(x => {
-
+  ants.forEach(ant => {
+    ant.updateTc(getValidMoveSites(getMoveOptions(ant.coord()), gHeight, gWidth, globalMap));
   });
 
   /*

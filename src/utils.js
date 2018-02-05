@@ -70,6 +70,8 @@ export function initialGlobalTargets(h, w, num, debug) {
 
 export function initialAnts(h, w, tgts, type, num) {
   /* Generate some initial ants */
+  h -= 1;
+  w -= 1;
   var a = [];
   var c = {x: 0, y: 0};
   for (var i = 0; i < num; i++) {

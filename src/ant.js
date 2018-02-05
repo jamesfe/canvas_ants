@@ -36,11 +36,13 @@ export class Ant {
       choice = this.randomWalk();
     }
 
+    /*
     if (sameCoord(choice, this.coord())) {
       // console.log("staying put");
       // Maybe we should bite something if it's nearby.
       this.biteTarget = this.findBitingTargets();
     }
+    */
 
     // Check bounds and make move
     if (choice.x >= 0 && choice.x <= this.maxX && choice.y >= 0 && choice.y <= this.maxY) {
@@ -84,15 +86,18 @@ export class Ant {
     var moveOpt = {x: 0, y: 0};
     /* The code below summarized:
     * Find a place that is closest to the target. */
+    var finalChoice = undefined;
     if (this.tc != undefined) {
-      this.tc.map(c => {
-        c.distance = getDistance(this.coord(), c.coord);
+      let choices = this.tc.map(c => {
+        c.distance = getDistance(tgt, c.coord);
         return(c);
       });
+      finalChoice = choices.reduce((a,b) => (a.distance < b.distance ? a : b), {distance: this.maxDist})
     }
-    // TODO: Get the minimum value from this (reduce)
-    // then, set moveOpt
-    if (minDist === this.maxDist) {
+
+    if (typeof finalChoice != 'undefined') {
+      moveOpt = finalChoice.coord;
+    } else {
       moveOpt = this.coord();
     }
     return moveOpt;

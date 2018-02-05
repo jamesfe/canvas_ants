@@ -12,9 +12,9 @@ let backgroundColor = [0, 0, 0];
 let wallColor = [255, 255, 0];
 
 
-var factor = 4;
-var runs = 10;
-var numAnts = 50;
+var factor = 10;
+var runs = 1000;
+var numAnts = 700;
 var numGlobalTargets = 3;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
@@ -46,9 +46,9 @@ function getMoveOptions(coord) {
 function getValidMoveSites(inArr, h, w, matrix) {
   /* Given a matrix from getMoveOptions, check the matrix for valid moves. */
   let validLocs = inArr
-    .filter(a => a.x >= 0 && a.x <= w && a.y >= 0 && a.y <= h)
+    .filter(a => a.x >= 0 && a.x < w && a.y >= 0 && a.y < h)
     .map(a => { return ({color: matrix[a.x][a.y], coord: a}); })
-    .filter(a => a.color != COLORS.WALL);
+    .filter(a => a.color === COLORS.NOTHING);
   return (validLocs);
 }
 
@@ -78,7 +78,7 @@ function buildWallItems(w, h) {
     }
   }
 }
-buildWallItems(gWidth, gHeight);
+//buildWallItems(gWidth, gHeight);
 
 function imageDataToMatrix(id) {
   /* Convert an image to a presence matrix (easy detection of walls, maybe) */
@@ -100,10 +100,12 @@ function updateWorld(tick) {
     globalMap[x][y] = COLORS.NOTHING;
     ant.updateTempContext(getValidMoveSites(getMoveOptions(ant.coord()), gHeight, gWidth, globalMap));
     ant.chooseNextPath(tick);
-    globalMap[x][y] = COLORS.ANT;
+    globalMap[ant.x][ant.y] = COLORS.ANT;
+
     // Make the move
     // Add the ant to the map
   });
+  console.log('moving done, drawing now');
 
   /*
   if (getRandomInt(0, 20) === 0) {
@@ -134,6 +136,7 @@ function updateWorld(tick) {
   let subt1 = performance.now();
   console.log("Global update took " + (subt1 - subt0) + " milliseconds.")
   */
+  console.log('drawing world');
   drawWorld();
 }
 
@@ -155,5 +158,5 @@ ctx.fillRect(Math.floor(width/3), Math.floor(height/3), width/3, height/3)
 
 // setInterval(updateWorld, 100);
 for (var p = 0; p < runs; p++) {
-  setTimeout(updateWorld, p, p);
+  setTimeout(updateWorld, p * 100, p);
 }

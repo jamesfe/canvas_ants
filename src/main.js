@@ -1,6 +1,7 @@
 import { initialAnts, initialGlobalTargets, newMat } from './utils.js';
 
 let COLORS = {
+  NOTHING: 0,
   WALL: 1,
   ANT: 2
 };
@@ -93,9 +94,13 @@ function updateWorld(tick) {
 
   // Now make some moves
   ants.forEach(ant => {
-    // Remove ant from the globalMap
-    ant.updateTc(getValidMoveSites(getMoveOptions(ant.coord()), gHeight, gWidth, globalMap));
-    ant.chooseNextPath();
+    /* We remove the ant from the global map */
+    let x = ant.x;
+    let y = ant.y;
+    globalMap[x][y] = COLORS.NOTHING;
+    ant.updateTempContext(getValidMoveSites(getMoveOptions(ant.coord()), gHeight, gWidth, globalMap));
+    ant.chooseNextPath(tick);
+    globalMap[x][y] = COLORS.ANT;
     // Make the move
     // Add the ant to the map
   });

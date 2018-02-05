@@ -19,18 +19,16 @@ export class Ant {
     this.maxDist = getDistance({x: 0, y: 0}, {x: maxX, y: maxY});
     this.tc = Array(this.contextSize).fill([]).map(x => Array(this.contextSize).fill(0));
     this.history = [];
+    if (this.speedPerTick !== 1) {
+      console.log('Should we do something about tick speed?');
+    }
   }
 
   coord() {
     return {x: this.x, y: this.y};
   }
 
-  makeMove(choice) {
-    /* Do the necessary checks and iterate ourselves by the number of ticks in the specified direction. */
-    console.log('TODO MOVE!');
-  }
-
-  chooseNextPath() {
+  chooseNextPath(t) {
     this.biteTarget = undefined;
     var choice = this.smartHeadToTarget();
     if (this.jitter && getRandomInt(0, this.jitterFactor) === 0) {
@@ -47,26 +45,22 @@ export class Ant {
     // Check bounds and make move
     if (choice.x >= 0 && choice.x <= this.maxX && choice.y >= 0 && choice.y <= this.maxY) {
       // Keep the last few moves to prevent jitter. (and for debugging)
+      /*
       this.history.push({x: this.x, y: this.y});
       let hl = this.history.length;
       if (hl > 3) {
         this.history = this.history.slice(hl - 3, hl);
       }
-      if (hl < 3 || !sameCoord(choice, this.history[1])) {
-        /* TODO: This should check our ticks and see how far we can go?? (but really, we can only go one square in
-         * any direction per tick, so is it necessary?
-         *
-         * Maybe for a bullet it's more necessary because they have to go multiple squares and should check each
-         * square as they go.
-         *
-         */
+      if (hl < 3 || !sameCoord(choice, this.history[1])) { */
         this.x = choice.x;
         this.y = choice.y;
+      /*
       } else {
-        this.biteTarget = this.findBitingTargets();
+        console.log('Look for a wall to bite?');
+        // this.biteTarget = this.findBitingTargets();
       }
+      */
     }
-    this.makeMove(choice);
   }
 
   randomWalk() {
@@ -108,7 +102,7 @@ export class Ant {
     this.targets = targets;
   }
 
-  updateTc(data) {
+  updateTempContext(data) {
     this.tc = data.map(x => x);
   }
 

@@ -124,29 +124,6 @@ export class Ant {
     return(minTarget);
   }
 
-  /* TODO: DELETE */
-  getTempContextFromSmall(smContext) {
-    /* From a small piece of context, set the current context. */
-    for (var x = 0; x < this.contextSize; x++) {
-      for (var y = 0; y < this.contextSize; y++) {
-        let start = ((y * this.contextSize) + x) * 4;
-        this.tc[x][y] = Array.from(smContext.slice(start, start + 4));
-      }
-    }
-  }
-
-  /* TODO: DELETE */
-  getContextArguments() {
-    /* Get the right x, y, height, and width to give to getImageData for context gathering.
-     * In other words, get a NxN square around our coordinate, pass the upper left and w/h back. */
-    return ({
-      x: this.x - Math.floor(this.contextSize / 2),
-      y: this.y - Math.floor(this.contextSize / 2),
-      w: this.contextSize,
-      h: this.contextSize
-    });
-  }
-
   normalizeTempContext(x, y) {
     /* Go from indices in our 3x3 matrix or whatever to a real coordinate */
     return ({

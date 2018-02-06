@@ -11,7 +11,6 @@ let targetColor = [255, 0, 0];
 let backgroundColor = [0, 0, 0];
 let wallColor = [255, 255, 0];
 
-
 var factor = 10;
 var runs = 1000;
 var numAnts = 700;
@@ -78,12 +77,7 @@ function buildWallItems(w, h) {
     }
   }
 }
-//buildWallItems(gWidth, gHeight);
-
-function imageDataToMatrix(id) {
-  /* Convert an image to a presence matrix (easy detection of walls, maybe) */
-
-}
+buildWallItems(gWidth, gHeight);
 
 function updateWorld(tick) {
   /* Add a random ant sometimes */
@@ -105,7 +99,6 @@ function updateWorld(tick) {
     // Make the move
     // Add the ant to the map
   });
-  console.log('moving done, drawing now');
 
   /*
   if (getRandomInt(0, 20) === 0) {
@@ -130,13 +123,10 @@ function updateWorld(tick) {
       if (newColor < 0) { newColor = 0; }
       putPixel(ants[i].biteTarget.target, [newColor, newColor, 0, 255])
     }
-    putPixel(ants[i].coord(), antColor);
   }
 
   let subt1 = performance.now();
   console.log("Global update took " + (subt1 - subt0) + " milliseconds.")
-  */
-  console.log('drawing world');
   drawWorld();
 }
 
@@ -147,14 +137,7 @@ function drawWorld() {
   wallItems.forEach(x => putSizedPixel(x, wallColor, factor));
 }
 
-/*
- * TODO: Delete this code, it should no longer be necessary
-clearScreen(backgroundColor);
-ctx.fillStyle = "rgba(255, 255, 0, 255)"
-ctx.fillRect(Math.floor(width/4), Math.floor(height/4), width/2, height/2)
-ctx.fillStyle = "rgba(0, 0, 0, 255)"
-ctx.fillRect(Math.floor(width/3), Math.floor(height/3), width/3, height/3)
-*/
+}
 
 // setInterval(updateWorld, 100);
 for (var p = 0; p < runs; p++) {

@@ -1,9 +1,10 @@
-import { initialAnts, initialGlobalTargets, newMat } from './utils.js';
+import { getMoveOptions, initialAnts, initialGlobalTargets, newMat } from './utils.js';
 
 let COLORS = {
   NOTHING: 0,
   WALL: 1,
-  ANT: 2
+  ANT: 2,
+  TARGET: 3
 };
 
 let antColor = [255, 255, 255];
@@ -25,29 +26,13 @@ var gWidth = Math.floor(canvas.width / factor);
 var ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-function getMoveOptions(coord) {
-  /* Given a {x: 1, y: 2} style object, find the adjacent cells. */
-  let x = coord.x;
-  let y = coord.y;
-  var retVals = [];
-  retVals.push({x: x - 1, y: y + 1});
-  retVals.push({x: x - 1, y: y});
-  retVals.push({x: x - 1, y: y - 1});
-  retVals.push({x: x, y: y + 1});
-  retVals.push({x: x, y: y}); // center
-  retVals.push({x: x, y: y - 1});
-  retVals.push({x: x + 1, y: y + 1});
-  retVals.push({x: x + 1, y: y});
-  retVals.push({x: x + 1, y: y - 1});
-  return (retVals);
-}
 
-function getValidMoveSites(inArr, h, w, matrix) {
+function getTempContext(inArr, h, w, matrix) {
   /* Given a matrix from getMoveOptions, check the matrix for valid moves. */
   let validLocs = inArr
     .filter(a => a.x >= 0 && a.x < w && a.y >= 0 && a.y < h)
     .map(a => { return ({color: matrix[a.x][a.y], coord: a}); })
-    .filter(a => a.color === COLORS.NOTHING);
+  // We cannot move into walls or other ants, for now we say we can only move into "nothing"
   return (validLocs);
 }
 
@@ -80,9 +65,11 @@ function buildWallItems(w, h) {
 buildWallItems(gWidth, gHeight);
 
 function updateWorld(tick) {
-  /* Add a random ant sometimes */
+  /* Deal with the business logic of the game. */
+  let subt0 = performance.now();
   var globalMap = newMat(gHeight, gWidth);
   // Register on global map
+  globalTargets.forEach(x => globalMap[x.x][x.y] = COLORS.TARGET);
   wallItems.forEach(x => globalMap[x.x][x.y] = COLORS.WALL);
   ants.forEach(x => globalMap[x.x][x.y] = COLORS.ANT);
 
@@ -92,36 +79,18 @@ function updateWorld(tick) {
     let x = ant.x;
     let y = ant.y;
     globalMap[x][y] = COLORS.NOTHING;
-    ant.updateTempContext(getValidMoveSites(getMoveOptions(ant.coord()), gHeight, gWidth, globalMap));
+    ant.updateTempContext(getTempContext(getMoveOptions(ant.coord()), gHeight, gWidth, globalMap));
     ant.chooseNextPath(tick);
     globalMap[ant.x][ant.y] = COLORS.ANT;
-
-    // Make the move
-    // Add the ant to the map
   });
 
-  /*
   if (getRandomInt(0, 20) === 0) {
+    /* From time to time, allow a random ant to enter the arena. */
     let c = getEdgeCoordinate(height, width);
-    let a = new Ant(c.x, c.y);
-    a.registerTargets(globalTargets);
-    ants.push(a);
-  }
-  let subt0 = performance.now();
-
-  // clearScreen(backgroundColor);
-
-  for (i in ants) {
-    let args = ants[i].getContextArguments();
-    let pixelData = ctx.getImageData(args.x, args.y, args.w, args.h);
-    ants[i].getTempContextFromSmall(pixelData.data);
-    putPixel(ants[i].coord(), backgroundColor);
-    ants[i].chooseNextPath();
-    if (typeof ants[i].biteTarget != 'undefined') {
-      let newColor = ants[i].biteTarget.color[0] - 15;
-      // console.log("Biting, new color: ", newColor, ants[i].biteTarget.target);
-      if (newColor < 0) { newColor = 0; }
-      putPixel(ants[i].biteTarget.target, [newColor, newColor, 0, 255])
+    if (globalMap[c.x][c.y] === COLORS.NOTHING) {
+      let a = new Ant(c.x, c.y);
+      a.registerTargets(globalTargets);
+      ants.push(a);
     }
   }
 
@@ -131,15 +100,18 @@ function updateWorld(tick) {
 }
 
 function drawWorld() {
+  let subt0 = performance.now();
   clearScreen(backgroundColor);
   globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, factor));
   ants.forEach(x => putSizedPixel(x.coord(), antColor, factor));
   wallItems.forEach(x => putSizedPixel(x, wallColor, factor));
-}
+  let subt1 = performance.now();
+  console.log("Global draw took " + (subt1 - subt0) + " milliseconds.")
 
 }
 
 // setInterval(updateWorld, 100);
+
 for (var p = 0; p < runs; p++) {
   setTimeout(updateWorld, p * 100, p);
 }

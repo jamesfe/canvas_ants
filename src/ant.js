@@ -131,25 +131,14 @@ export class Ant {
   }
 
   findBitingTargets() {
-    var options = [];
-    for (var x = 0; x < this.contextSize; x++) {
-      for (var y = 0; y < this.contextSize; y++) {
-        let col = this.tc[x][y];
-        if (col.length === 4 && col[0] === col[1] && col[2] === 0 && col[1] > 0) {
-        // if (this.tc[x][y].length === 4 && this.tc[x][y][0] > 0 && this.tc[x][y][0] === this.tc[x][y][1]) {
-          // this is an adjacent yellow-shaded point, we should return it
-          // console.log('finding a target');
-          options.push({
-            color: this.tc[x][y],
-            target: this.normalizeTempContext(x, y)
-          });
-        }
-      }
+    /* Find a wall that is close by that needs to be bitten. */
+    var biteTarget = undefined;
+    if (this.tc !== undefined) {
+      let validTargets = this.tc
+        .filter(a => a.color === COLORS.WALL);
+      biteTarget = validTargets[getRandomInt(0, validTargets.length - 1)].coord;
     }
-    if (options.length > 0) {
-      return (options[getRandomInt(0, options.length - 1)]);
-    }
-    return undefined;
+    return (biteTarget);
   }
 }
 

@@ -32,45 +32,44 @@ export class Ant {
     this.biteTarget = undefined;
     var choice = this.smartHeadToTarget();
     if (this.jitter && getRandomInt(0, this.jitterFactor) === 0) {
-      // TODO: This code just hacks through walls, it needs to be fixed. Until then jitter=true is a bug
       choice = this.randomWalk();
     }
 
-    /*
     if (sameCoord(choice, this.coord())) {
-      // console.log("staying put");
-      // Maybe we should bite something if it's nearby.
+      // Staying put? Maybe we should bite something if it's nearby.
       this.biteTarget = this.findBitingTargets();
     }
-    */
 
     // Check bounds and make move
     if (choice.x >= 0 && choice.x <= this.maxX && choice.y >= 0 && choice.y <= this.maxY) {
-      // Keep the last few moves to prevent jitter. (and for debugging)
-      /*
       this.history.push({x: this.x, y: this.y});
       let hl = this.history.length;
       if (hl > 3) {
+        // This is meant to prevent jitter but may cause a bug later.
         this.history = this.history.slice(hl - 3, hl);
       }
-      if (hl < 3 || !sameCoord(choice, this.history[1])) { */
+      if (hl < 3 || !sameCoord(choice, this.history[1])) {
         this.x = choice.x;
         this.y = choice.y;
-      /*
       } else {
         console.log('Look for a wall to bite?');
-        // this.biteTarget = this.findBitingTargets();
+        this.biteTarget = this.findBitingTargets();
       }
-      */
     }
   }
 
   randomWalk() {
     /* Choose a random place to step into and return it. */
-    return {
-      x: this.x + getRandomInt(-1, 1),
-      y: this.y + getRandomInt(-1, 1)
-    };
+    var finalChoice = undefined;
+    if (this.tc != undefined) {
+      let choices = this.tc
+        .filter(a => a.color === COLORS.NOTHING);
+      finalChoice = choices[getRandomInt(0, choices.length - 1)];
+    }
+    if (finalChoice !== undefined) {
+      return (finalChoice.coord);
+    }
+    return (this.coord());
   }
 
   smartHeadToTarget() {
@@ -78,24 +77,23 @@ export class Ant {
     let tgt = this.findClosestTarget();
     /* If we are one block away, no need to jitter. */
     if (getDistance(this.coord(), tgt.coord()) <= 1.3) {
-      // Stop moving.
       return this.coord();
     }
-    var moveOption = this.coord();
-    var minDist = this.maxDist;
-    var moveOpt = {x: 0, y: 0};
-    /* The code below summarized:
-    * Find a place that is closest to the target. */
     var finalChoice = undefined;
     if (this.tc != undefined) {
-      let choices = this.tc.map(c => {
-        c.distance = getDistance(tgt, c.coord);
-        return(c);
-      });
-      finalChoice = choices.reduce((a,b) => (a.distance < b.distance ? a : b), {distance: this.maxDist})
+      let choices = this.tc
+        .filter(a => a.color === COLORS.NOTHING)
+        .map(c => {
+          c.distance = getDistance(tgt, c.coord);
+          return(c);
+        });
+      finalChoice = choices.reduce(
+        (a,b) => (a.distance < b.distance ? a : b),
+        {distance: this.maxDist});
     }
 
-    if (typeof finalChoice != 'undefined') {
+    var moveOpt = {x: 0, y: 0}; // TODO: Is this dangerous? Could we teleport to origin?
+    if (finalChoice !== undefined) {
       moveOpt = finalChoice.coord;
     } else {
       moveOpt = this.coord();

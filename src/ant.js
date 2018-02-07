@@ -81,7 +81,8 @@ export class Ant {
 
   smartHeadToTarget() {
     /* Check local context and pick the closest available square to move to the center */
-    let tgt = this.findClosestTarget();
+    let tgt = this.closestTarget;
+    var moveOpt = this.coord();
     /* If we are one block away, no need to jitter. */
     if (getDistance(this.coord(), tgt.coord()) <= 1.3) {
       return this.coord();
@@ -90,33 +91,37 @@ export class Ant {
     let choices = this.tc
       .filter(a => a.color === COLORS.NOTHING)
       .map(c => {
-        c.distance = getDistance(tgt, c.coord);
+        c.distance = getRelativeDistance(tgt, c.coord);
         return(c);
       });
     finalChoice = choices.reduce(
       (a,b) => (a.distance < b.distance ? a : b),
-      {distance: this.maxDist});
+      {distance: this.maxRelDist});
 
-    var moveOpt = {x: 0, y: 0}; // TODO: Is this dangerous? Could we teleport to origin?
     if (finalChoice !== undefined) {
       moveOpt = finalChoice.coord;
-    } else {
-      moveOpt = this.coord();
     }
     return moveOpt;
   }
 
   registerTargets(targets) {
     this.targets = targets;
+    this.setTarget();
   }
 
   updateTempContext(data) {
     this.tc = data.map(x => x);
   }
 
-  findClosestTarget() {
-    var minDist = this.maxRelDist;
-    var minTarget = undefined;
+  setTarget() {
+    // var minDist = this.maxRelDist;
+    // var minTarget = undefined;
+    this.closestTarget = this.targets
+      .map(i => return ({dist: getRelativeDistance(this.coord(), d.coord()), t: i});)
+      .reduce(
+        (a, b) => (a.dist < b.dist ? a: b),
+        {dist: this.maxRelDist});
+    /*
     for (var t in this.targets) {
       var dist = getRelativeDistance(this.coord(), this.targets[t].coord());
       if (dist < minDist) {
@@ -124,7 +129,7 @@ export class Ant {
         minTarget = this.targets[t];
       }
     }
-    return(minTarget);
+    */
   }
 
   normalizeTempContext(x, y) {

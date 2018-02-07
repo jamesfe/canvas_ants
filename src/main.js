@@ -16,8 +16,8 @@ let backgroundColor = [0, 0, 0];
 let wallColor = [255, 255, 0];
 
 var factor = 4;
-var runs = 100;
-var numAnts = 1300;
+var runs = 20;
+var numAnts = 2000;
 var numGlobalTargets = 3;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
@@ -65,6 +65,7 @@ function buildWallItems(w, h) {
   }
 }
 buildWallItems(gWidth, gHeight);
+
 
 function updateWorld(tick) {
   /* Deal with the business logic of the game. */

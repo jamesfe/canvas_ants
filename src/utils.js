@@ -27,6 +27,12 @@ export function getDistance(p1, p2) {
   return Math.sqrt( a*a + b*b );
 }
 
+export function getRelativeDistance(p1, p2) {
+  var a = p1.x - p2.x;
+  var b = p1.y - p2.y;
+
+  return (a*a + b*b);
+}
 
 export function sameCoord(c1, c2) {
   /* If it's the same coordinate, return true */

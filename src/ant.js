@@ -1,4 +1,4 @@
-import {COLORS, getDistance, getRandomInt, sameCoord, sameColor} from './utils.js';
+import {COLORS, getDistance, getRelativeDistance, getRandomInt, sameCoord, sameColor} from './utils.js';
 
 export class Ant {
 
@@ -17,6 +17,7 @@ export class Ant {
     this.x = x;
     this.y = y;
     this.maxDist = getDistance({x: 0, y: 0}, {x: maxX, y: maxY});
+    this.maxRelDist = getRelativeDistance({x: 0, y: 0}, {x: maxX, y: maxY});
     this.tc = Array(this.contextSize).fill([]).map(x => Array(this.contextSize).fill(0));
     this.history = [];
     if (this.speedPerTick !== 1) {
@@ -110,10 +111,10 @@ export class Ant {
   }
 
   findClosestTarget() {
-    var minDist = this.maxDist;
+    var minDist = this.maxRelDist;
     var minTarget = undefined;
     for (var t in this.targets) {
-      var dist = getDistance(this.coord(), this.targets[t].coord());
+      var dist = getRelativeDistance(this.coord(), this.targets[t].coord());
       if (dist < minDist) {
         minDist = dist;
         minTarget = this.targets[t];

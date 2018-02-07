@@ -116,5 +116,5 @@ function drawWorld() {
 // setInterval(updateWorld, 100);
 
 for (var p = 0; p < runs; p++) {
-  setTimeout(updateWorld, p * 100, p);
+  setTimeout(updateWorld, p, p);
 }

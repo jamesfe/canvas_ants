@@ -18,7 +18,7 @@ export class Ant {
     this.y = y;
     this.maxDist = getDistance({x: 0, y: 0}, {x: maxX, y: maxY});
     this.maxRelDist = getRelativeDistance({x: 0, y: 0}, {x: maxX, y: maxY});
-    this.tc = Array(this.contextSize).fill([]).map(x => Array(this.contextSize).fill(0));
+    this.tc = [];
     this.history = [];
     if (this.speedPerTick !== 1) {
       console.log('Should we do something about tick speed?');
@@ -30,6 +30,12 @@ export class Ant {
   }
 
   chooseNextPath(t) {
+    /*
+     * Optimization targets:
+     * 1. Do not calculate smartHeadToTarget if not necessary
+     * 2. Do not calculate biting targets unless it is necessary
+     *
+     * */
     this.biteTarget = undefined;
     var choice = this.smartHeadToTarget();
     if (this.jitter && getRandomInt(0, this.jitterFactor) === 0) {
@@ -81,17 +87,15 @@ export class Ant {
       return this.coord();
     }
     var finalChoice = undefined;
-    if (this.tc != undefined) {
-      let choices = this.tc
-        .filter(a => a.color === COLORS.NOTHING)
-        .map(c => {
-          c.distance = getDistance(tgt, c.coord);
-          return(c);
-        });
-      finalChoice = choices.reduce(
-        (a,b) => (a.distance < b.distance ? a : b),
-        {distance: this.maxDist});
-    }
+    let choices = this.tc
+      .filter(a => a.color === COLORS.NOTHING)
+      .map(c => {
+        c.distance = getDistance(tgt, c.coord);
+        return(c);
+      });
+    finalChoice = choices.reduce(
+      (a,b) => (a.distance < b.distance ? a : b),
+      {distance: this.maxDist});
 
     var moveOpt = {x: 0, y: 0}; // TODO: Is this dangerous? Could we teleport to origin?
     if (finalChoice !== undefined) {

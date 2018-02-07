@@ -138,9 +138,11 @@ export function getMoveOptions(coord) {
   let x = coord.x;
   let y = coord.y;
   var retVals = [];
-  retVals.push({x: x - 1, y: y + 1});
-  retVals.push({x: x - 1, y: y});
-  retVals.push({x: x - 1, y: y - 1});
+  if (x > 0) { // Premature optimization
+    retVals.push({x: x - 1, y: y + 1});
+    retVals.push({x: x - 1, y: y});
+    retVals.push({x: x - 1, y: y - 1});
+  }
   retVals.push({x: x, y: y + 1});
   retVals.push({x: x, y: y}); // center
   retVals.push({x: x, y: y - 1});

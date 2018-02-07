@@ -1,20 +1,23 @@
-import { getMoveOptions, initialAnts, initialGlobalTargets, newMat } from './utils.js';
+import {
+  getEdgeCoordinate,
+  COLORS,
+  getMoveOptions,
+  getRandomInt,
+  initialAnts,
+  initialGlobalTargets,
+  newMat } from './utils.js';
 
-let COLORS = {
-  NOTHING: 0,
-  WALL: 1,
-  ANT: 2,
-  TARGET: 3
-};
+import { Ant } from './ant.js';
+
 
 let antColor = [255, 255, 255];
 let targetColor = [255, 0, 0];
 let backgroundColor = [0, 0, 0];
 let wallColor = [255, 255, 0];
 
-var factor = 10;
-var runs = 1000;
-var numAnts = 700;
+var factor = 4;
+var runs = 100;
+var numAnts = 1300;
 var numGlobalTargets = 3;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
@@ -35,7 +38,6 @@ function getTempContext(inArr, h, w, matrix) {
   // We cannot move into walls or other ants, for now we say we can only move into "nothing"
   return (validLocs);
 }
-
 
 function putSizedPixel(coord, col, s) {
   ctx.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+',255)';
@@ -84,11 +86,11 @@ function updateWorld(tick) {
     globalMap[ant.x][ant.y] = COLORS.ANT;
   });
 
-  if (getRandomInt(0, 20) === 0) {
+  if (getRandomInt(0, 2) === -10) {
     /* From time to time, allow a random ant to enter the arena. */
-    let c = getEdgeCoordinate(height, width);
+    let c = getEdgeCoordinate(gHeight, gWidth);
     if (globalMap[c.x][c.y] === COLORS.NOTHING) {
-      let a = new Ant(c.x, c.y);
+      let a = new Ant(c.x, c.y, gWidth, gHeight);
       a.registerTargets(globalTargets);
       ants.push(a);
     }

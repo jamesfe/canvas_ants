@@ -1,4 +1,4 @@
-import {getDistance, getRandomInt, sameCoord, sameColor} from './utils.js';
+import {COLORS, getDistance, getRandomInt, sameCoord, sameColor} from './utils.js';
 
 export class Ant {
 
@@ -136,7 +136,9 @@ export class Ant {
     if (this.tc !== undefined) {
       let validTargets = this.tc
         .filter(a => a.color === COLORS.WALL);
-      biteTarget = validTargets[getRandomInt(0, validTargets.length - 1)].coord;
+      if (validTargets.length > 0) {
+        biteTarget = validTargets[getRandomInt(0, validTargets.length - 1)].coord;
+      }
     }
     return (biteTarget);
   }

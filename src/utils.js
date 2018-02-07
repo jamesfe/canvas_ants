@@ -1,6 +1,16 @@
 import { Target } from './target.js';
 import { Ant } from './ant.js';
 
+const COLORS = {
+  NOTHING: 0,
+  WALL: 1,
+  ANT: 2,
+  TARGET: 3
+};
+
+export { COLORS };
+
+
 export function getRandomInt(min, max) {
   /* Returns a random number, inclusive of min and max */
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -23,9 +33,11 @@ export function sameCoord(c1, c2) {
   return (c1.x === c2.x && c1.y === c2.y);
 }
 
-function getEdgeCoordinate(h, w) {
+export function getEdgeCoordinate(h, w) {
   /* Get a random edge coordinate. */
   var randX, randY;
+  h -= 1;
+  w -= 1;
   switch (getRandomInt(0, 3)) {
   case 0: // top
     randX = 0;
@@ -58,7 +70,7 @@ export function initialGlobalTargets(h, w, num, debug) {
   /* Generate some random targets but otherwise just put one in the middle for debug mode */
   var tgts = [];
   if (debug === true) {
-    tgts.push(new Target(w/2, h/2));
+    tgts.push(new Target(Math.floor(w/2), Math.floor(h/2)));
   } else {
     for (var i = 0; i < num; i++) {
       let c = getRandomCoordinate(h, w);

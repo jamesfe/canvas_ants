@@ -9,7 +9,6 @@ import {
 
 import { Ant } from './ant.js';
 
-
 let antColor = [255, 255, 255];
 let targetColor = [255, 0, 0];
 let backgroundColor = [0, 0, 0];
@@ -38,7 +37,7 @@ function getTempContext(inArr, h, w, matrix) {
   /* Given a matrix from getMoveOptions, check the matrix for valid moves. */
   let validLocs = inArr
     .filter(a => a.x >= 0 && a.x < w && a.y >= 0 && a.y < h)
-    .map(a => { return ({color: matrix[a.x][a.y], coord: a}); })
+    .map(a => { return ({color: matrix[a.x][a.y], coord: a}); });
   // We cannot move into walls or other ants, for now we say we can only move into "nothing"
   return (validLocs);
 }
@@ -140,10 +139,10 @@ function drawWorld() {
 
 function showPerformance() {
   let avgUpdate = updates.reduce((a, b) => a + b, 0) / updates.length;
-  console.log("Average update: ", avgUpdate, " first: ", updates[0], " last: ", updates[updates.length - 1]);
+  console.log('Average update: ', avgUpdate, ' first: ', updates[0], ' last: ', updates[updates.length - 1]);
 
   let avgDraw = draws.reduce((a, b) => a + b, 0) / draws.length;
-  console.log("Average draws: ", avgDraw, " first: ", draws[0], " last: ", draws[draws.length - 1]);
+  console.log('Average draws: ', avgDraw, ' first: ', draws[0], ' last: ', draws[draws.length - 1]);
 }
 
 function startMovement() {
@@ -154,7 +153,7 @@ function startMovement() {
 }
 
 function addWall() {
-  console.log("Adding wall.");
+  console.log('Adding wall.');
   clickAction = 'add_wall';
 }
 
@@ -167,7 +166,7 @@ function canvasClickHandler(event) {
 
 }
 
-document.getElementById("addWall").addEventListener("mouseup", addWall);
-document.getElementById("canvas").addEventListener("mouseup", canvasClickHandler);
+document.getElementById('addWall').addEventListener('mouseup', addWall);
+document.getElementById('canvas').addEventListener('mouseup', canvasClickHandler);
 
 startMovement();

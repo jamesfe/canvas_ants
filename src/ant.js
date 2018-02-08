@@ -121,7 +121,7 @@ export class Ant {
     this.closestTarget = this.targets
       .map(i => {
         let b = {dist: getRelativeDistance(this.coord(), i.coord()), t: i};
-        return b
+        return b;
       })
       .reduce(
         (a, b) => (a.dist < b.dist ? a: b),

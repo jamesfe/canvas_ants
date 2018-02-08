@@ -12,7 +12,7 @@ import { Ant } from './ant.js';
 let targetColor = [0, 0, 255];
 let backgroundColor = [0, 0, 0];
 
-var numAntsPerCycle = 20;
+var numAntsPerCycle = 10;
 var started = false;
 var globalDrawCancellation = undefined;
 var tick = 0;
@@ -23,7 +23,7 @@ let timePerRun = 50; // how many ms we want each cycle to take
 /* But a side-note on this: Our code has to be efficient enough for the
  * update loop to run in < this amount of time. */
 var numAnts = 2000;
-var numGlobalTargets = 60;
+var numGlobalTargets = 5;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
 var width = canvas.width;
@@ -194,14 +194,19 @@ function addWall() {
   clickAction = 'add_wall';
 }
 
+function newWall(x, y) {
+  if (wallItems.find(i => i.x === x && i.y === y) === undefined) {
+    wallItems.push({x: x, y: y, health: 255});
+  }
+}
+
 function canvasClickHandler(event) {
+  console.log(event);
   if (clickAction === 'add_wall') {
     let x = Math.floor(event.layerX / factor);
     let y = Math.floor(event.layerY / factor);
-    wallItems.push({x: x, y: y, health: 255});
-    wallItems.push({x: x, y: y + 1, health: 255});
-    wallItems.push({x: x + 1, y: y, health: 255});
-    wallItems.push({x: x + 1, y: y + 1, health: 255});
+    let p = getMoveOptions({x: x, y: y});
+    p.forEach(i => newWall(i.x, i.y));
   }
 }
 
@@ -212,8 +217,8 @@ function stopMovement() {
 let drawInterval = setInterval(drawWorld, timePerRun);
 
 document.getElementById('addWall').addEventListener('mouseup', addWall);
-document.getElementById('canvas').addEventListener('mouseup', canvasClickHandler);
+document.getElementById('canvas').addEventListener('mousemove', canvasClickHandler);
 document.getElementById('start').addEventListener('mouseup', startMovement, drawInterval);
 document.getElementById('stop').addEventListener('mouseup', stopMovement);
 
-startMovement();
+// startMovement();

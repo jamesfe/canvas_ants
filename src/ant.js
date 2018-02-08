@@ -55,7 +55,6 @@ export class Ant {
       if (hl < 3 || !sameCoord(choice, this.history[1])) {
         this.x = choice.x;
         this.y = choice.y;
-        this.health -= 1;
         return (true);
       } else {
         this.biteTarget = this.findBitingTargets();

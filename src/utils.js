@@ -109,28 +109,6 @@ export function initialAnts(h, w, tgts, type, num) {
   return (a);
 }
 
-/*
-function generateDistanceMap(targets, height, width) {
-  var maxDist = getDistance({x: 0, y: 0}, {x: width, y: height});
-  var distanceMap = Array(height).fill([]).map(x => Array(width).fill(0));
-  for (var h = 0; h < height; h++) {
-    for (var w = 0; w < width; w++) {
-      var minTarget = undefined;
-      for (var t in targets) {
-        var minDist = maxDist; // set it to the max value, then find smaller values
-        var dist = getDistance({x: h, y: w}, targets[t].coord());
-        if (dist < minDist) {
-          minDist = dist;
-          minTarget = targets[t];
-        }
-      }
-      distanceMap[h][w] = (255 * minDist) / maxDist; // scale so it's <= 255
-    }
-  }
-  return (distanceMap);
-}
-*/
-
 export function newMat(h, w) {
   return (new Array(h).fill([]).map(x => Array(w).fill(0)));
 }

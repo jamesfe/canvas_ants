@@ -9,19 +9,21 @@ import {
 
 import { Ant } from './ant.js';
 
-let targetColor = [255, 0, 0];
+let targetColor = [0, 0, 255];
 let backgroundColor = [0, 0, 0];
 
+var numAntsPerCycle = 20;
+var started = false;
 var globalDrawCancellation = undefined;
 var tick = 0;
 var clickAction = 'nothing';
-var factor = 4;
+var factor = 3;
 var runs = 400;
 let timePerRun = 50; // how many ms we want each cycle to take
 /* But a side-note on this: Our code has to be efficient enough for the
  * update loop to run in < this amount of time. */
-var numAnts = 2500;
-var numGlobalTargets = 3;
+var numAnts = 2000;
+var numGlobalTargets = 60;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
 var width = canvas.width;
@@ -32,7 +34,6 @@ var gWidth = Math.floor(canvas.width / factor);
 var ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-
 function getTempContext(inArr, h, w, matrix) {
   /* Given a matrix from getMoveOptions, check the matrix for valid moves. */
   let validLocs = inArr
@@ -40,6 +41,10 @@ function getTempContext(inArr, h, w, matrix) {
     .map(a => { return ({color: matrix[a.x][a.y], coord: a}); });
   // We cannot move into walls or other ants, for now we say we can only move into "nothing"
   return (validLocs);
+}
+
+function antColor(health) {
+  return [255 - health, health, 0];
 }
 
 function putSizedPixel(coord, col, s) {
@@ -52,7 +57,7 @@ function clearScreen(col) {
   ctx.fillRect(0, 0, width, height);
 }
 
-var globalTargets = initialGlobalTargets(gHeight, gWidth, numGlobalTargets, true);
+var globalTargets = initialGlobalTargets(gHeight, gWidth, numGlobalTargets, false);
 var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
 
 var wallItems = [];
@@ -69,15 +74,31 @@ function buildWallItems(w, h) {
 }
 buildWallItems(gWidth, gHeight);
 
+
 var updates = [];
 var draws = [];
 
 function updateWorld() {
   /* Deal with the business logic of the game. */
+
+  function generateNewAnt() {
+    /* Generate a new ant from the edge and return it. */
+    var c = getEdgeCoordinate(gHeight, gWidth);
+    while (globalMap[c.x][c.y] !== COLORS.NOTHING) {
+      var c = getEdgeCoordinate(gHeight, gWidth);
+    }
+    let a = new Ant(c.x, c.y, gWidth, gHeight);
+    a.registerTargets(globalTargets);
+    return (a);
+  }
+
   let subt0 = performance.now();
   var globalMap = newMat(gHeight, gWidth);
   // Register on global map
+  var updateTargets = false;
+  let preLength = globalTargets.length;
   globalTargets = globalTargets.filter(x => x.health > 0);
+  updateTargets = (preLength !== globalTargets.length);
   globalTargets.forEach(x => globalMap[x.x][x.y] = COLORS.TARGET);
   wallItems = wallItems.filter(x => x.health > 0);
   wallItems.forEach(x => globalMap[x.x][x.y] = COLORS.WALL);
@@ -87,13 +108,16 @@ function updateWorld() {
   // Now make some moves
   ants.forEach(ant => {
     /* We remove the ant from the global map */
+    if (updateTargets === true) {
+      ant.registerTargets(globalTargets);
+    }
     let x = ant.x;
     let y = ant.y;
     globalMap[x][y] = COLORS.NOTHING;
     ant.updateTempContext(getTempContext(getMoveOptions(ant.coord()), gHeight, gWidth, globalMap));
     let hasMoved = ant.chooseNextPath(tick);
     if (hasMoved === false) {
-      // bite
+      // bite logic differs a tiny bit by target
       let biteTarget = ant.biteTarget;
       if (biteTarget !== undefined) {
         switch (biteTarget.color) {
@@ -101,14 +125,14 @@ function updateWorld() {
             let wall = wallItems.find(i => i.x == biteTarget.coord.x && i.y == biteTarget.coord.y);
             if (wall !== undefined) {
               wall.health -= 65;
-              ant.health -= 45;
+              ant.decHealth(45);
             }
             break;
           case COLORS.TARGET:
             let tgt = globalTargets.find(i => i.x == biteTarget.coord.x && i.y == biteTarget.coord.y);
             if (tgt !== undefined) {
               tgt.health -= 5;
-              ant.health = 0;
+              ant.zeroHealth();
             }
             break;
           }
@@ -117,22 +141,20 @@ function updateWorld() {
     globalMap[ant.x][ant.y] = COLORS.ANT;
   });
 
-  /* TODO: Add a "new ants per cycle variable" */
-  if (getRandomInt(0, 2) === 2) {
-    /* From time to time, allow a random ant to enter the arena. */
-    let c = getEdgeCoordinate(gHeight, gWidth);
-    if (globalMap[c.x][c.y] === COLORS.NOTHING) {
-      let a = new Ant(c.x, c.y, gWidth, gHeight);
-      a.registerTargets(globalTargets);
-      ants.push(a);
-    }
+  for (var i = 0; i < numAntsPerCycle; i++) {
+    let a = generateNewAnt();
+    ants.push(a);
   }
 
   let subt1 = performance.now();
-  // console.log("Global update took " + (subt1 - subt0) + " milliseconds.")
   updates.push(subt1-subt0);
   drawWorld();
   if (tick > runs || globalTargets.length === 0) {
+    if (tick > runs) {
+      console.log("Congratulations, time ran out!");
+    } else {
+      console.log("You were unable to protect all the targets.");
+    }
     clearInterval(globalDrawCancellation);
     showPerformance()
   } else {
@@ -144,10 +166,9 @@ function drawWorld() {
   let subt0 = performance.now();
   clearScreen(backgroundColor);
   globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, factor));
-  ants.forEach(x => putSizedPixel(x.coord(), new Array(3).fill(x.health), factor));
+  ants.forEach(x => putSizedPixel(x.coord(), antColor(x.health), factor));
   wallItems.forEach(x => putSizedPixel(x, [x.health, x.health, 0], factor));
   let subt1 = performance.now();
-  // console.log("Global draw took " + (subt1 - subt0) + " milliseconds.")
   draws.push(subt1-subt0);
 }
 
@@ -160,10 +181,13 @@ function showPerformance() {
 }
 
 function startMovement(cancellation) {
-  if (cancellation !== undefined) {
-    clearTimeout(cancellation);
+  if (started === false) {
+    started = true;
+    if (cancellation !== undefined) {
+      clearTimeout(cancellation);
+    }
+    globalDrawCancellation = setInterval(updateWorld, timePerRun);
   }
-  globalDrawCancellation = setInterval(updateWorld, timePerRun);
 }
 
 function addWall() {
@@ -172,7 +196,6 @@ function addWall() {
 
 function canvasClickHandler(event) {
   if (clickAction === 'add_wall') {
-    console.log('adding wall');
     let x = Math.floor(event.layerX / factor);
     let y = Math.floor(event.layerY / factor);
     wallItems.push({x: x, y: y, health: 255});
@@ -180,7 +203,10 @@ function canvasClickHandler(event) {
     wallItems.push({x: x + 1, y: y, health: 255});
     wallItems.push({x: x + 1, y: y + 1, health: 255});
   }
+}
 
+function stopMovement() {
+  clearInterval(globalDrawCancellation);
 }
 
 let drawInterval = setInterval(drawWorld, timePerRun);
@@ -188,5 +214,6 @@ let drawInterval = setInterval(drawWorld, timePerRun);
 document.getElementById('addWall').addEventListener('mouseup', addWall);
 document.getElementById('canvas').addEventListener('mouseup', canvasClickHandler);
 document.getElementById('start').addEventListener('mouseup', startMovement, drawInterval);
+document.getElementById('stop').addEventListener('mouseup', stopMovement);
 
 startMovement();

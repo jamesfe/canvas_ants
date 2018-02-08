@@ -74,6 +74,8 @@ function getRandomCoordinate(h, w) {
 
 export function initialGlobalTargets(h, w, num, debug) {
   /* Generate some random targets but otherwise just put one in the middle for debug mode */
+  h -= 1;
+  w -= 1;
   var tgts = [];
   if (debug === true) {
     tgts.push(new Target(Math.floor(w/2), Math.floor(h/2)));

@@ -78,14 +78,30 @@ export class Ant {
     return (this.coord());
   }
 
+  decHealth(v) {
+    this.health -= v;
+  }
+
+  zeroHealth() {
+    this.health = -1;
+  }
+
   smartHeadToTarget() {
     /* Check local context and pick the closest available square to move to the center */
     let tgt = this.closestTarget;
     var moveOpt = this.coord();
     /* If we are one block away, no need to jitter. */
-    if (getDistance(this.coord(), tgt.coord()) <= 1.3) {
+    if (tgt === undefined) {
       return this.coord();
+    } else {
+      var tgtDist = getDistance(this.coord(), tgt.coord());
+      if (tgtDist === 0) {
+        this.zeroHealth();
+      } else if(tgtDist <= 1.3) {
+        return this.coord();
+      }
     }
+
     var finalChoice = undefined;
     let choices = this.tc
       .filter(a => a.color === COLORS.NOTHING)
@@ -123,15 +139,6 @@ export class Ant {
       .reduce(
         (a, b) => (a.dist < b.dist ? a: b),
         {dist: this.maxRelDist}).t;
-    /*
-    for (var t in this.targets) {
-      var dist = getRelativeDistance(this.coord(), this.targets[t].coord());
-      if (dist < minDist) {
-        minDist = dist;
-        minTarget = this.targets[t];
-      }
-    }
-    */
   }
 
   normalizeTempContext(x, y) {

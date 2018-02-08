@@ -58,9 +58,10 @@ export class Ant {
       if (hl < 3 || !sameCoord(choice, this.history[1])) {
         this.x = choice.x;
         this.y = choice.y;
+        return (true);
       } else {
-        console.log('Look for a wall to bite?');
         this.biteTarget = this.findBitingTargets();
+        return (false);
       }
     }
   }
@@ -117,10 +118,13 @@ export class Ant {
     // var minDist = this.maxRelDist;
     // var minTarget = undefined;
     this.closestTarget = this.targets
-      .map(i => return ({dist: getRelativeDistance(this.coord(), d.coord()), t: i});)
+      .map(i => {
+        let b = {dist: getRelativeDistance(this.coord(), i.coord()), t: i};
+        return b
+      })
       .reduce(
         (a, b) => (a.dist < b.dist ? a: b),
-        {dist: this.maxRelDist});
+        {dist: this.maxRelDist}).t;
     /*
     for (var t in this.targets) {
       var dist = getRelativeDistance(this.coord(), this.targets[t].coord());

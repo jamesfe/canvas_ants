@@ -15,9 +15,9 @@ let targetColor = [255, 0, 0];
 let backgroundColor = [0, 0, 0];
 let wallColor = [255, 255, 0];
 
-var clickAction = 'nothiong';
+var clickAction = 'nothing';
 var factor = 4;
-var runs = 200;
+var runs = 400;
 let timePerRun = 50; // how many ms we want each cycle to take
 /* But a side-note on this: Our code has to be efficient enough for the
  * update loop to run in < this amount of time. */
@@ -99,14 +99,15 @@ function updateWorld(tick) {
         let wall = wallItems.find(i => i.x == biteTarget.x && i.y == biteTarget.y);
         if (wall !== undefined) {
           wall.health -= 65;
-          ant.health -= 20;
+          ant.health -= 45;
         }
       }
     }
     globalMap[ant.x][ant.y] = COLORS.ANT;
   });
 
-  if (getRandomInt(0, 2) === -10) {
+  /* TODO: Add a "new ants per cycle variable" */
+  if (getRandomInt(0, 2) === 2) {
     /* From time to time, allow a random ant to enter the arena. */
     let c = getEdgeCoordinate(gHeight, gWidth);
     if (globalMap[c.x][c.y] === COLORS.NOTHING) {
@@ -126,7 +127,7 @@ function drawWorld() {
   let subt0 = performance.now();
   clearScreen(backgroundColor);
   globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, factor));
-  ants.forEach(x => putSizedPixel(x.coord(), antColor, factor));
+  ants.forEach(x => putSizedPixel(x.coord(), new Array(3).fill(x.health), factor));
   wallItems.forEach(x => putSizedPixel(x, [x.health, x.health, 0], factor));
   let subt1 = performance.now();
   // console.log("Global draw took " + (subt1 - subt0) + " milliseconds.")

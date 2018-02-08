@@ -15,10 +15,13 @@ let targetColor = [255, 0, 0];
 let backgroundColor = [0, 0, 0];
 let wallColor = [255, 255, 0];
 
+var clickAction = 'nothiong';
 var factor = 4;
 var runs = 200;
-let timePerRun = 30;
-var numAnts = 2000;
+let timePerRun = 50; // how many ms we want each cycle to take
+/* But a side-note on this: Our code has to be efficient enough for the
+ * update loop to run in < this amount of time. */
+var numAnts = 2500;
 var numGlobalTargets = 3;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
@@ -78,6 +81,7 @@ function updateWorld(tick) {
   globalTargets.forEach(x => globalMap[x.x][x.y] = COLORS.TARGET);
   wallItems = wallItems.filter(x => x.health > 0);
   wallItems.forEach(x => globalMap[x.x][x.y] = COLORS.WALL);
+  ants = ants.filter(x => x.health > 0);
   ants.forEach(x => globalMap[x.x][x.y] = COLORS.ANT);
 
   // Now make some moves
@@ -95,6 +99,7 @@ function updateWorld(tick) {
         let wall = wallItems.find(i => i.x == biteTarget.x && i.y == biteTarget.y);
         if (wall !== undefined) {
           wall.health -= 65;
+          ant.health -= 20;
         }
       }
     }
@@ -146,5 +151,22 @@ function startMovement() {
   }
   setTimeout(showPerformance, runs * timePerRun);
 }
+
+function addWall() {
+  console.log("Adding wall.");
+  clickAction = 'add_wall';
+}
+
+function canvasClickHandler(event) {
+  if (clickAction === 'add_wall') {
+    let x = Math.floor(event.layerX / factor);
+    let y = Math.floor(event.layerY / factor);
+    wallItems.push({x: x, y: y, health: 255});
+  }
+
+}
+
+document.getElementById("addWall").addEventListener("mouseup", addWall);
+document.getElementById("canvas").addEventListener("mouseup", canvasClickHandler);
 
 startMovement();

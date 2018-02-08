@@ -1,4 +1,4 @@
-import {COLORS, getDistance, getRelativeDistance, getRandomInt, sameCoord, sameColor} from './utils.js';
+import {COLORS, getDistance, getRelativeDistance, getRandomInt, sameCoord} from './utils.js';
 
 export class Ant {
 
@@ -20,9 +20,6 @@ export class Ant {
     this.maxRelDist = getRelativeDistance({x: 0, y: 0}, {x: maxX, y: maxY});
     this.tc = [];
     this.history = [];
-    if (this.speedPerTick !== 1) {
-      console.log('Should we do something about tick speed?');
-    }
   }
 
   coord() {
@@ -150,9 +147,9 @@ export class Ant {
     var biteTarget = undefined;
     if (this.tc !== undefined) {
       let validTargets = this.tc
-        .filter(a => a.color === COLORS.WALL);
+        .filter(a => a.color === COLORS.WALL || a.color === COLORS.TARGET);
       if (validTargets.length > 0) {
-        biteTarget = validTargets[getRandomInt(0, validTargets.length - 1)].coord;
+        biteTarget = validTargets[getRandomInt(0, validTargets.length - 1)];
       }
     }
     return (biteTarget);

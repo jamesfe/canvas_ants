@@ -12,17 +12,17 @@ import { Ant } from './ant.js';
 let targetColor = [0, 0, 255];
 let backgroundColor = [0, 0, 0];
 
-var numAntsPerCycle = 10;
+var numAntsPerCycle = 1;
 var started = false;
 var globalDrawCancellation = undefined;
 var tick = 0;
 var clickAction = 'nothing';
 var factor = 3;
-var runs = 400;
-let timePerRun = 50; // how many ms we want each cycle to take
+var runs = 4000;
+let timePerRun = 60; // how many ms we want each cycle to take
 /* But a side-note on this: Our code has to be efficient enough for the
  * update loop to run in < this amount of time. */
-var numAnts = 2000;
+var numAnts = 1;
 var numGlobalTargets = 5;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
@@ -141,6 +141,13 @@ function updateWorld() {
     globalMap[ant.x][ant.y] = COLORS.ANT;
   });
 
+  // numAntsPerCycle = Math.floor(tick / 100);
+  if (tick % 100 === 0) {
+    numAntsPerCycle = tick;
+  } else {
+    numAntsPerCycle = 0;
+  }
+
   for (var i = 0; i < numAntsPerCycle; i++) {
     let a = generateNewAnt();
     ants.push(a);
@@ -165,9 +172,9 @@ function updateWorld() {
 function drawWorld() {
   let subt0 = performance.now();
   clearScreen(backgroundColor);
-  globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, factor));
   ants.forEach(x => putSizedPixel(x.coord(), antColor(x.health), factor));
   wallItems.forEach(x => putSizedPixel(x, [x.health, x.health, 0], factor));
+  globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, factor));
   let subt1 = performance.now();
   draws.push(subt1-subt0);
 }
@@ -194,19 +201,18 @@ function addWall() {
   clickAction = 'add_wall';
 }
 
-function newWall(x, y) {
-  if (wallItems.find(i => i.x === x && i.y === y) === undefined) {
+function newWall(x, y, mX, mY) {
+  if (x < mX && y < mY && x > 0 && y > 0 && wallItems.find(i => i.x === x && i.y === y) === undefined) {
     wallItems.push({x: x, y: y, health: 255});
   }
 }
 
 function canvasClickHandler(event) {
-  console.log(event);
   if (clickAction === 'add_wall') {
     let x = Math.floor(event.layerX / factor);
     let y = Math.floor(event.layerY / factor);
     let p = getMoveOptions({x: x, y: y});
-    p.forEach(i => newWall(i.x, i.y));
+    p.forEach(i => newWall(i.x, i.y, gWidth, gHeight));
   }
 }
 

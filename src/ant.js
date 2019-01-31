@@ -117,7 +117,7 @@ export class Ant {
     // var minDist = this.maxRelDist;
     // var minTarget = undefined;
     this.closestTarget = this.targets
-      .map(i => return ({dist: getRelativeDistance(this.coord(), d.coord()), t: i});)
+      .map(i => ({dist: getRelativeDistance(this.coord(), d.coord()), t: i});)
       .reduce(
         (a, b) => (a.dist < b.dist ? a: b),
         {dist: this.maxRelDist});

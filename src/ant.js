@@ -13,7 +13,7 @@ export class Ant {
     this.maxY = maxY;
     this.speedPerTick = 1; // TODO: Integrate this into movement.
     this.lastTick = undefined || 0;
-    this.health = 100;
+    this.health = 255;
     this.x = x;
     this.y = y;
     this.maxDist = getDistance({x: 0, y: 0}, {x: maxX, y: maxY});
@@ -58,9 +58,11 @@ export class Ant {
       if (hl < 3 || !sameCoord(choice, this.history[1])) {
         this.x = choice.x;
         this.y = choice.y;
+        this.health -= 1;
+        return (true);
       } else {
-        console.log('Look for a wall to bite?');
         this.biteTarget = this.findBitingTargets();
+        return (false);
       }
     }
   }
@@ -120,7 +122,7 @@ export class Ant {
       .map(i => ({dist: getRelativeDistance(this.coord(), d.coord()), t: i});)
       .reduce(
         (a, b) => (a.dist < b.dist ? a: b),
-        {dist: this.maxRelDist});
+        {dist: this.maxRelDist}).t;
     /*
     for (var t in this.targets) {
       var dist = getRelativeDistance(this.coord(), this.targets[t].coord());

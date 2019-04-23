@@ -17,7 +17,7 @@ var started = false;
 var globalDrawCancellation = undefined;
 var tick = 0;
 var clickAction = 'nothing';
-var factor = 3;
+var factor = 6;
 var runs = 4000;
 let timePerRun = 60; // how many ms we want each cycle to take
 /* But a side-note on this: Our code has to be efficient enough for the

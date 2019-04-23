@@ -5,12 +5,11 @@ export class Ant {
   constructor(x, y, maxX, maxY, tick) {
     // Some things that should be static
     this.contextSize = 3;
-    this.jitter = false;
-    this.jitterFactor = 3;
-
-    // Things that aren't static
+    this.jitter = true;
+    this.jitterFactor = getRandomInt(0, 5); 
     this.maxX = maxX;
     this.maxY = maxY;
+    // Things that aren't static this.maxX = maxX; this.maxY = maxY;
     this.speedPerTick = 1; // TODO: Integrate this into movement.
     this.lastTick = undefined || 0;
     this.health = 255;

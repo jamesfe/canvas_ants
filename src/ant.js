@@ -118,6 +118,7 @@ export class Ant {
   }
 
   registerTargets(targets) {
+    /* Get the global target list and set the closest one as a target. */
     this.targets = targets;
     this.setTarget();
   }
@@ -127,6 +128,7 @@ export class Ant {
   }
 
   setTarget() {
+    /* Find the closest target out of a list of targets and set it as the primary target. */
     // var minDist = this.maxRelDist;
     // var minTarget = undefined;
     this.closestTarget = this.targets

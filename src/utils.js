@@ -1,5 +1,6 @@
 import { Target } from './target.js';
 import { Ant } from './ant.js';
+import { Gun } from './gun.js';
 
 const COLORS = {
   NOTHING: 0,
@@ -132,3 +133,17 @@ export function getMoveOptions(coord) {
   return (retVals);
 }
 
+export function initialGuns(h, w, num) {
+  /* Generate some initial guns */
+  h -= 1;
+  w -= 1;
+
+  var a = [];
+  var c = {x: 0, y: 0};
+  for (var i = 0; i < num; i++) {
+      c = getRandomCoordinate(h, w);
+    a.push(new Gun(c.x, c.y, w, h));
+  }
+  return (a);
+
+}

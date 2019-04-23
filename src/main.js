@@ -4,12 +4,16 @@ import {
   getMoveOptions,
   getRandomInt,
   initialAnts,
+  initialGuns,
   initialGlobalTargets,
   newMat } from './utils.js';
 
 import { Ant } from './ant.js';
+import { Gun } from './gun.js';
 
 let targetColor = [0, 0, 255];
+let gunColor = [255, 255, 255];
+let bulletColor = gunColor;
 let backgroundColor = [0, 0, 0];
 
 var numAntsPerCycle = 1;
@@ -48,9 +52,17 @@ function antColor(health) {
 }
 
 function putSizedPixel(coord, col, s) {
+  /* Put a pixel with size s on the world map.*/
   ctx.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+',255)';
   ctx.fillRect(coord.x * s, coord.y * s, s, s);
 }
+
+function putSingleSizedPixel(coord, col, s, size) {
+  /* Put a pixel with size s on the world map.*/
+  ctx.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+',255)';
+  ctx.fillRect(coord.x * s, coord.y * s, size, size);
+}
+
 
 function clearScreen(col) {
   ctx.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+',255)';
@@ -59,6 +71,8 @@ function clearScreen(col) {
 
 var globalTargets = initialGlobalTargets(gHeight, gWidth, numGlobalTargets, false);
 var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
+var guns = initialGuns(gHeight, gWidth, 5);
+var bullets = [];
 
 var wallItems = [];
 
@@ -115,7 +129,9 @@ function updateWorld() {
     let y = ant.y;
     globalMap[x][y] = COLORS.NOTHING;
     ant.updateTempContext(getTempContext(getMoveOptions(ant.coord()), gHeight, gWidth, globalMap));
+    // This next line updates biteTarget
     let hasMoved = ant.chooseNextPath(tick);
+
     if (hasMoved === false) {
       // bite logic differs a tiny bit by target
       let biteTarget = ant.biteTarget;
@@ -139,6 +155,17 @@ function updateWorld() {
       }
     }
     globalMap[ant.x][ant.y] = COLORS.ANT;
+  });
+
+  guns.forEach(gun => {
+    var newItem = gun.live();
+    if (newItem !== undefined) {
+      bullets.push(newItem);
+    }
+  });
+  bullets.forEach(bullet => {
+    bullet.live();
+    // TODO: Kill a bullet if it falls off the world
   });
 
   // numAntsPerCycle = Math.floor(tick / 100);
@@ -175,6 +202,8 @@ function drawWorld() {
   ants.forEach(x => putSizedPixel(x.coord(), antColor(x.health), factor));
   wallItems.forEach(x => putSizedPixel(x, [x.health, x.health, 0], factor));
   globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, factor));
+  guns.forEach(x => putSizedPixel(x.coord(), gunColor, factor));
+  bullets.forEach(x => putSingleSizedPixel(x.coord(), bulletColor, factor, 2));
   let subt1 = performance.now();
   draws.push(subt1-subt0);
 }

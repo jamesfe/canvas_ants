@@ -6,7 +6,7 @@ export class Ant {
     // Some things that should be static
     this.contextSize = 3;
     this.jitter = true;
-    this.jitterFactor = getRandomInt(0, 5); 
+    this.jitterFactor = getRandomInt(0, 5);
     this.maxX = maxX;
     this.maxY = maxY;
     // Things that aren't static this.maxX = maxX; this.maxY = maxY;

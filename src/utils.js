@@ -29,6 +29,7 @@ export function getDistance(p1, p2) {
 }
 
 export function getRelativeDistance(p1, p2) {
+  /* return the distance without doing the expensive sqrt function */
   var a = p1.x - p2.x;
   var b = p1.y - p2.y;
 

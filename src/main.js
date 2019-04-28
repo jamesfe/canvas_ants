@@ -3,6 +3,7 @@ import {
   COLORS,
   getMoveOptions,
   getRandomInt,
+  getRelativeDistance,
   initialAnts,
   initialGuns,
   initialGlobalTargets,
@@ -39,7 +40,8 @@ var ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
 function getTempContext(inArr, h, w, matrix) {
-  /* Given a matrix from getMoveOptions, check the matrix for valid moves. */
+  /* Given a matrix from getMoveOptions, check the matrix for valid moves.
+    * Return a list of the colors and coordinates for each. */
   let validLocs = inArr
     .filter(a => a.x >= 0 && a.x < w && a.y >= 0 && a.y < h)
     .map(a => { return ({color: matrix[a.x][a.y], coord: a}); });
@@ -71,7 +73,7 @@ function clearScreen(col) {
 
 var globalTargets = initialGlobalTargets(gHeight, gWidth, numGlobalTargets, false);
 var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
-var guns = initialGuns(gHeight, gWidth, 5);
+var guns = initialGuns(gHeight, gWidth, 50);
 var bullets = [];
 
 var wallItems = [];
@@ -157,16 +159,27 @@ function updateWorld() {
     globalMap[ant.x][ant.y] = COLORS.ANT;
   });
 
+  let squaredRange = Math.pow(50, 2);
   guns.forEach(gun => {
-    var newItem = gun.live();
+    let closestAnt = ants.find(a => getRelativeDistance(a, gun) <= squaredRange);
+    var newItem = gun.live(closestAnt);
     if (newItem !== undefined) {
       bullets.push(newItem);
     }
   });
   bullets.forEach(bullet => {
-    bullet.live();
-    // TODO: Kill a bullet if it falls off the world
+    let bc = bullet.coord();
+    if (bc !== undefined) {
+      let bColor = globalMap[bc.x][bc.y];
+      bullet.live(bColor);
+      if (bColor === COLORS.ANT) {
+        ants.filter(a => (a.x === bc.x) && (a.y === bc.y)).forEach(a => a.decHealth(200));
+        bullet.dead = true;
+      }
+    }
+    // Make an ant lose health if it hits the ant
   });
+  bullets = bullets.filter(x => x.dead === false);
 
   // numAntsPerCycle = Math.floor(tick / 100);
   if (tick % 100 === 0) {
@@ -203,7 +216,12 @@ function drawWorld() {
   wallItems.forEach(x => putSizedPixel(x, [x.health, x.health, 0], factor));
   globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, factor));
   guns.forEach(x => putSizedPixel(x.coord(), gunColor, factor));
-  bullets.forEach(x => putSingleSizedPixel(x.coord(), bulletColor, factor, 2));
+  bullets.forEach(x => {
+    let crd = x.coord();
+    if (crd !== undefined) {
+      putSingleSizedPixel(x.coord(), bulletColor, factor, 2);
+    }
+  });
   let subt1 = performance.now();
   draws.push(subt1-subt0);
 }
@@ -229,6 +247,10 @@ function startMovement(cancellation) {
 function addWall() {
   clickAction = 'add_wall';
 }
+function addGun() {
+  clickAction = 'add_gun';
+}
+
 
 function newWall(x, y, mX, mY) {
   if (x < mX && y < mY && x > 0 && y > 0 && wallItems.find(i => i.x === x && i.y === y) === undefined) {
@@ -243,6 +265,11 @@ function canvasClickHandler(event) {
     let p = getMoveOptions({x: x, y: y});
     p.forEach(i => newWall(i.x, i.y, gWidth, gHeight));
   }
+  if (clickAction === 'add_gun') {
+    let x = Math.floor(event.layerX / factor);
+    let y = Math.floor(event.layerY / factor);
+    guns.push(new Gun(x, y, gWidth, gHeight));
+  }
 }
 
 function stopMovement() {
@@ -252,7 +279,8 @@ function stopMovement() {
 let drawInterval = setInterval(drawWorld, timePerRun);
 
 document.getElementById('addWall').addEventListener('mouseup', addWall);
-document.getElementById('canvas').addEventListener('mousemove', canvasClickHandler);
+document.getElementById('addGun').addEventListener('mouseup', addGun);
+document.getElementById('canvas').addEventListener('mouseup', canvasClickHandler);
 document.getElementById('start').addEventListener('mouseup', startMovement, drawInterval);
 document.getElementById('stop').addEventListener('mouseup', stopMovement);
 

@@ -17,6 +17,7 @@ let gunColor = [255, 255, 255];
 let bulletColor = gunColor;
 let backgroundColor = [0, 0, 0];
 
+let gunRange = 50;
 var numAntsPerCycle = 1;
 var started = false;
 var globalDrawCancellation = undefined;
@@ -73,7 +74,7 @@ function clearScreen(col) {
 
 var globalTargets = initialGlobalTargets(gHeight, gWidth, numGlobalTargets, false);
 var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
-var guns = initialGuns(gHeight, gWidth, 50);
+var guns = initialGuns(gHeight, gWidth, 10, gunRange);
 var bullets = [];
 
 var wallItems = [];
@@ -107,6 +108,18 @@ function updateWorld() {
     a.registerTargets(globalTargets);
     return (a);
   }
+
+  function generateSpecificAnt(x, y) {
+    /* Generate a new ant from the edge and return it. */
+    let c = {x: x, y: y};
+    if (globalMap[c.x][c.y] !== COLORS.NOTHING) {
+      return undefined;
+    }
+    let a = new Ant(c.x, c.y, gWidth, gHeight);
+    a.registerTargets(globalTargets);
+    return (a);
+  }
+
 
   let subt0 = performance.now();
   var globalMap = newMat(gHeight, gWidth);
@@ -159,7 +172,7 @@ function updateWorld() {
     globalMap[ant.x][ant.y] = COLORS.ANT;
   });
 
-  let squaredRange = Math.pow(50, 2);
+  let squaredRange = Math.pow(gunRange, 2);
   guns.forEach(gun => {
     let closestAnt = ants.find(a => getRelativeDistance(a, gun) <= squaredRange);
     var newItem = gun.live(closestAnt);
@@ -187,11 +200,21 @@ function updateWorld() {
   } else {
     numAntsPerCycle = 0;
   }
-
+  /*
   for (var i = 0; i < numAntsPerCycle; i++) {
     let a = generateNewAnt();
-    ants.push(a);
+    let a = generateSpecificAnt(60, 60);
+    if (a !== undefined) {
+      ants.push(a);
+    }
+  } */
+  for (var i = 0; i < 5; i++) {
+    let a = generateSpecificAnt(60 + getRandomInt(0, 5), 60 + getRandomInt(0, 5));
+    if (a !== undefined) {
+      ants.push(a);
+    }
   }
+
 
   let subt1 = performance.now();
   updates.push(subt1-subt0);

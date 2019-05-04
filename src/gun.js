@@ -4,7 +4,7 @@ import {
 
 export class Gun {
 
-  constructor(x, y, maxX, maxY) {
+  constructor(x, y, maxX, maxY, range) {
     this.x = x;
     this.y = y;
     this.maxX = maxX;
@@ -12,10 +12,15 @@ export class Gun {
     this.moment = 0;
     this.rate = 2;
     this.angle = getRandomInt(0, 57);
+    this.range = range;
   }
 
   coord() {
     return {x: this.x, y: this.y};
+  }
+
+  getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
   }
 
   live(inputAnt) {
@@ -24,8 +29,10 @@ export class Gun {
     if ((this.moment % this.rate === 0) && (inputAnt !== undefined)) {
       // 57 is 180 / pi and rounded
       // let angle = getRandomInt(0, 57);
-      let angle = Math.atan2(this.x - inputAnt.x, this.y - inputAnt.y);
-      return(new Bullet(this.x, this.y, this.maxX, this.maxY, angle));
+      let tolerance = Math.PI * 0.05;
+      // let angle = Math.atan2(this.x - inputAnt.x, this.y - inputAnt.y) + (this.getRandomArbitrary(-1 * tolerance, tolerance));
+      let angle = Math.atan2(inputAnt.y - this.y, inputAnt.x - this.x) + (this.getRandomArbitrary(-1 * tolerance, tolerance));
+      return(new Bullet(this.x, this.y, this.maxX, this.maxY, angle, this.range));
     }
   }
 }
@@ -33,7 +40,7 @@ export class Gun {
 
 export class Bullet {
 
-  constructor(x, y, maxX, maxY, angle) {
+  constructor(x, y, maxX, maxY, angle, range) {
     this.x = x;
     this.y = y;
     this.maxX = maxX;
@@ -41,6 +48,7 @@ export class Bullet {
     this.angle = angle;
     this.age = 0;
     this.dead = false;
+    this.range = range;
   }
 
   coord() {
@@ -62,7 +70,7 @@ export class Bullet {
       return (undefined);
     }
     this.age++;
-    if (this.age > 25) {
+    if (this.age > this.range) {
       this.dead = true;
     }
     this.x += Math.cos(this.angle);

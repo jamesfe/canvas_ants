@@ -134,7 +134,7 @@ export function getMoveOptions(coord) {
   return (retVals);
 }
 
-export function initialGuns(h, w, num) {
+export function initialGuns(h, w, num, range) {
   /* Generate some initial guns */
   h -= 1;
   w -= 1;
@@ -143,7 +143,7 @@ export function initialGuns(h, w, num) {
   var c = {x: 0, y: 0};
   for (var i = 0; i < num; i++) {
       c = getRandomCoordinate(h, w);
-    a.push(new Gun(c.x, c.y, w, h));
+    a.push(new Gun(c.x, c.y, w, h, range));
   }
   return (a);
 

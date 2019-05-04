@@ -18,6 +18,7 @@ let bulletColor = gunColor;
 let backgroundColor = [0, 0, 0];
 
 let gunRange = 50;
+let numGuns = 5;
 var numAntsPerCycle = 1;
 var started = false;
 var globalDrawCancellation = undefined;
@@ -50,6 +51,10 @@ function getTempContext(inArr, h, w, matrix) {
   return (validLocs);
 }
 
+function round(x) {
+  return Math.floor(x);
+}
+
 function antColor(health) {
   return [255 - health, health, 0];
 }
@@ -74,10 +79,18 @@ function clearScreen(col) {
 
 var globalTargets = initialGlobalTargets(gHeight, gWidth, numGlobalTargets, false);
 var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
-var guns = initialGuns(gHeight, gWidth, 10, gunRange);
+var guns = initialGuns(gHeight, gWidth, numGuns, gunRange);
 var bullets = [];
 
 var wallItems = [];
+var permWallItems = [];
+
+function buildPermWall(w, h) {
+  for (var x = 0; x < w; x++ ) {
+    permWallItems.push({x: x, y: round(gHeight / 2)});
+  }
+}
+buildPermWall(gWidth, gHeight);
 
 function buildWallItems(w, h) {
   /* Act on wallItems array as a side-effect */
@@ -195,26 +208,25 @@ function updateWorld() {
   bullets = bullets.filter(x => x.dead === false);
 
   // numAntsPerCycle = Math.floor(tick / 100);
-  if (tick % 100 === 0) {
+  if (tick % 200 === 0) {
     numAntsPerCycle = tick;
   } else {
     numAntsPerCycle = 0;
   }
-  /*
+
   for (var i = 0; i < numAntsPerCycle; i++) {
     let a = generateNewAnt();
-    let a = generateSpecificAnt(60, 60);
     if (a !== undefined) {
       ants.push(a);
     }
-  } */
+  }
+  /*
   for (var i = 0; i < 5; i++) {
     let a = generateSpecificAnt(60 + getRandomInt(0, 5), 60 + getRandomInt(0, 5));
     if (a !== undefined) {
       ants.push(a);
     }
-  }
-
+  }*/
 
   let subt1 = performance.now();
   updates.push(subt1-subt0);
@@ -237,6 +249,7 @@ function drawWorld() {
   clearScreen(backgroundColor);
   ants.forEach(x => putSizedPixel(x.coord(), antColor(x.health), factor));
   wallItems.forEach(x => putSizedPixel(x, [x.health, x.health, 0], factor));
+  permWallItems.forEach(x => putSizedPixel(x, [255, 0, 0], factor));
   globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, factor));
   guns.forEach(x => putSizedPixel(x.coord(), gunColor, factor));
   bullets.forEach(x => {

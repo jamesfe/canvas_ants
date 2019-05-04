@@ -1,8 +1,8 @@
 export class Target {
   constructor(x, y) {
     this.health = 255;
-    this.x = x;
-    this.y = y;
+    this.x = Math.floor(x);
+    this.y = Math.floor(y);
   }
 
   coord() {

@@ -6,7 +6,8 @@ const COLORS = {
   NOTHING: 0,
   WALL: 1,
   ANT: 2,
-  TARGET: 3
+  TARGET: 3,
+  PERMWALL: 4
 };
 
 export { COLORS };
@@ -83,8 +84,8 @@ export function initialGlobalTargets(h, w, num, debug) {
     tgts.push(new Target(Math.floor(w/2), Math.floor(h/2)));
   } else {
     for (var i = 0; i < num; i++) {
-      let c = getRandomCoordinate(h, w);
-      tgts.push(new Target(c.x, c.y));
+      let c = getRandomCoordinate(h * 0.6, w * 0.6);
+      tgts.push(new Target(c.x + (w * 0.2), c.y + (h * 0.2)));
     }
   }
   return (tgts);

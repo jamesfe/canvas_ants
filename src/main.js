@@ -9,6 +9,8 @@ import {
   initialGlobalTargets,
   newMat } from './utils.js';
 
+import config from './config.js';
+
 import { Ant } from './ant.js';
 import { Gun } from './gun.js';
 
@@ -17,26 +19,19 @@ let gunColor = [255, 255, 255];
 let bulletColor = gunColor;
 let backgroundColor = [0, 0, 0];
 
-let gunRange = 50;
-let numGuns = 5;
-var numAntsPerCycle = 1;
+let numAntsPerCycle = 1;
 var started = false;
 var globalDrawCancellation = undefined;
 var tick = 0;
 var clickAction = 'nothing';
-var factor = 6;
-var runs = 4000;
-let timePerRun = 60; // how many ms we want each cycle to take
-/* But a side-note on this: Our code has to be efficient enough for the
- * update loop to run in < this amount of time. */
 var numAnts = 1;
 var numGlobalTargets = 5;
 var canvas = document.getElementById('canvas');
 var height = canvas.height;
 var width = canvas.width;
 
-var gHeight = Math.floor(canvas.height / factor);
-var gWidth = Math.floor(canvas.width / factor);
+var gHeight = Math.floor(canvas.height / config.world.factor);
+var gWidth = Math.floor(canvas.width / config.world.factor);
 
 var ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
@@ -79,7 +74,7 @@ function clearScreen(col) {
 
 var globalTargets = initialGlobalTargets(gHeight, gWidth, numGlobalTargets, false);
 var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
-var guns = initialGuns(gHeight, gWidth, numGuns, gunRange);
+var guns = initialGuns(gHeight, gWidth, config.guns.numGuns, config.guns.gunRange);
 var bullets = [];
 
 var wallItems = [];
@@ -87,7 +82,11 @@ var permWallItems = [];
 
 function buildPermWall(w, h) {
   for (var x = 0; x < w; x++ ) {
+    permWallItems.push({x: x, y: round(gHeight / 4)});
     permWallItems.push({x: x, y: round(gHeight / 2)});
+    permWallItems.push({y: x, x: round(gHeight / 4)});
+    permWallItems.push({y: x, x: round(gHeight / 2)});
+
   }
 }
 buildPermWall(gWidth, gHeight);
@@ -102,7 +101,7 @@ function buildWallItems(w, h) {
     }
   }
 }
-buildWallItems(gWidth, gHeight);
+// buildWallItems(gWidth, gHeight);
 
 
 var updates = [];
@@ -142,6 +141,7 @@ function updateWorld() {
   globalTargets = globalTargets.filter(x => x.health > 0);
   updateTargets = (preLength !== globalTargets.length);
   globalTargets.forEach(x => globalMap[x.x][x.y] = COLORS.TARGET);
+  permWallItems.forEach(x => globalMap[x.x][x.y] = COLORS.PERMWALL);
   wallItems = wallItems.filter(x => x.health > 0);
   wallItems.forEach(x => globalMap[x.x][x.y] = COLORS.WALL);
   ants = ants.filter(x => x.health > 0);
@@ -185,7 +185,7 @@ function updateWorld() {
     globalMap[ant.x][ant.y] = COLORS.ANT;
   });
 
-  let squaredRange = Math.pow(gunRange, 2);
+  let squaredRange = Math.pow(config.guns.gunRange, 2);
   guns.forEach(gun => {
     let closestAnt = ants.find(a => getRelativeDistance(a, gun) <= squaredRange);
     var newItem = gun.live(closestAnt);
@@ -231,8 +231,8 @@ function updateWorld() {
   let subt1 = performance.now();
   updates.push(subt1-subt0);
   drawWorld();
-  if (tick > runs || globalTargets.length === 0) {
-    if (tick > runs) {
+  if (tick > config.world.runs || globalTargets.length === 0) {
+    if (tick > config.world.runs) {
       console.log("Congratulations, time ran out!");
     } else {
       console.log("You were unable to protect all the targets.");
@@ -247,15 +247,15 @@ function updateWorld() {
 function drawWorld() {
   let subt0 = performance.now();
   clearScreen(backgroundColor);
-  ants.forEach(x => putSizedPixel(x.coord(), antColor(x.health), factor));
-  wallItems.forEach(x => putSizedPixel(x, [x.health, x.health, 0], factor));
-  permWallItems.forEach(x => putSizedPixel(x, [255, 0, 0], factor));
-  globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, factor));
-  guns.forEach(x => putSizedPixel(x.coord(), gunColor, factor));
+  ants.forEach(x => putSizedPixel(x.coord(), antColor(x.health), config.world.factor));
+  wallItems.forEach(x => putSizedPixel(x, [x.health, x.health, 0], config.world.factor));
+  permWallItems.forEach(x => putSizedPixel(x, [255, 0, 0], config.world.factor));
+  globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, config.world.factor));
+  guns.forEach(x => putSizedPixel(x.coord(), gunColor, config.world.factor));
   bullets.forEach(x => {
     let crd = x.coord();
     if (crd !== undefined) {
-      putSingleSizedPixel(x.coord(), bulletColor, factor, 2);
+      putSingleSizedPixel(x.coord(), bulletColor, config.world.factor, 2);
     }
   });
   let subt1 = performance.now();
@@ -276,7 +276,7 @@ function startMovement(cancellation) {
     if (cancellation !== undefined) {
       clearTimeout(cancellation);
     }
-    globalDrawCancellation = setInterval(updateWorld, timePerRun);
+    globalDrawCancellation = setInterval(updateWorld, config.world.timePerRun);
   }
 }
 
@@ -296,14 +296,14 @@ function newWall(x, y, mX, mY) {
 
 function canvasClickHandler(event) {
   if (clickAction === 'add_wall') {
-    let x = Math.floor(event.layerX / factor);
-    let y = Math.floor(event.layerY / factor);
+    let x = Math.floor(event.layerX / config.world.factor);
+    let y = Math.floor(event.layerY / config.world.factor);
     let p = getMoveOptions({x: x, y: y});
     p.forEach(i => newWall(i.x, i.y, gWidth, gHeight));
   }
   if (clickAction === 'add_gun') {
-    let x = Math.floor(event.layerX / factor);
-    let y = Math.floor(event.layerY / factor);
+    let x = Math.floor(event.layerX / config.world.factor);
+    let y = Math.floor(event.layerY / config.world.factor);
     guns.push(new Gun(x, y, gWidth, gHeight));
   }
 }
@@ -312,7 +312,7 @@ function stopMovement() {
   clearInterval(globalDrawCancellation);
 }
 
-let drawInterval = setInterval(drawWorld, timePerRun);
+let drawInterval = setInterval(drawWorld, config.world.timePerRun);
 
 document.getElementById('addWall').addEventListener('mouseup', addWall);
 document.getElementById('addGun').addEventListener('mouseup', addGun);

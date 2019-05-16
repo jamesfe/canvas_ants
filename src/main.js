@@ -2,12 +2,15 @@ import {
   getEdgeCoordinate,
   COLORS,
   getMoveOptions,
-  getRandomInt,
   getRelativeDistance,
+  newMat } from './utils.js';
+
+import {
   initialAnts,
   initialGuns,
   initialGlobalTargets,
-  newMat } from './utils.js';
+  buildWallItems,
+  buildPermWall } from './initializationHelpers.js';
 
 import config from './config.js';
 
@@ -46,14 +49,6 @@ function getTempContext(inArr, h, w, matrix) {
   return (validLocs);
 }
 
-function round(x) {
-  return Math.floor(x);
-}
-
-function antColor(health) {
-  return [255 - health, health, 0];
-}
-
 function putSizedPixel(coord, col, s) {
   /* Put a pixel with size s on the world map.*/
   ctx.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+',255)';
@@ -66,43 +61,19 @@ function putSingleSizedPixel(coord, col, s, size) {
   ctx.fillRect(coord.x * s, coord.y * s, size, size);
 }
 
-
 function clearScreen(col) {
   ctx.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+',255)';
   ctx.fillRect(0, 0, width, height);
 }
 
+/* Initialize all the various items on the map */
 var globalTargets = initialGlobalTargets(gHeight, gWidth, numGlobalTargets, false);
 var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
 var guns = initialGuns(gHeight, gWidth, config.guns.numGuns, config.guns.gunRange);
 var bullets = [];
 
-var wallItems = [];
-var permWallItems = [];
-
-function buildPermWall(w, h) {
-  for (var x = 0; x < w; x++ ) {
-    permWallItems.push({x: x, y: round(gHeight / 4)});
-    permWallItems.push({x: x, y: round(gHeight / 2)});
-    permWallItems.push({y: x, x: round(gHeight / 4)});
-    permWallItems.push({y: x, x: round(gHeight / 2)});
-
-  }
-}
-buildPermWall(gWidth, gHeight);
-
-function buildWallItems(w, h) {
-  /* Act on wallItems array as a side-effect */
-  for (var x = 0; x < w; x ++) {
-    for (var y = 0; y < h; y ++) {
-      if ((y > 60 && y < 80 ) || (y > 140 && y < 160)) {
-        wallItems.push({x: x, y: y, health: 255});
-      }
-    }
-  }
-}
-// buildWallItems(gWidth, gHeight);
-
+var permWallItems = buildPermWall(gWidth, gHeight, []);
+var wallItems = buildWallItems(gWidth, gHeight, []);
 
 var updates = [];
 var draws = [];
@@ -114,24 +85,12 @@ function updateWorld() {
     /* Generate a new ant from the edge and return it. */
     var c = getEdgeCoordinate(gHeight, gWidth);
     while (globalMap[c.x][c.y] !== COLORS.NOTHING) {
-      var c = getEdgeCoordinate(gHeight, gWidth);
+      c = getEdgeCoordinate(gHeight, gWidth);
     }
     let a = new Ant(c.x, c.y, gWidth, gHeight);
     a.registerTargets(globalTargets);
     return (a);
   }
-
-  function generateSpecificAnt(x, y) {
-    /* Generate a new ant from the edge and return it. */
-    let c = {x: x, y: y};
-    if (globalMap[c.x][c.y] !== COLORS.NOTHING) {
-      return undefined;
-    }
-    let a = new Ant(c.x, c.y, gWidth, gHeight);
-    a.registerTargets(globalTargets);
-    return (a);
-  }
-
 
   let subt0 = performance.now();
   var globalMap = newMat(gHeight, gWidth);
@@ -165,21 +124,21 @@ function updateWorld() {
       let biteTarget = ant.biteTarget;
       if (biteTarget !== undefined) {
         switch (biteTarget.color) {
-          case COLORS.WALL:
-            let wall = wallItems.find(i => i.x == biteTarget.coord.x && i.y == biteTarget.coord.y);
-            if (wall !== undefined) {
-              wall.health -= 65;
-              ant.decHealth(45);
-            }
-            break;
-          case COLORS.TARGET:
-            let tgt = globalTargets.find(i => i.x == biteTarget.coord.x && i.y == biteTarget.coord.y);
-            if (tgt !== undefined) {
-              tgt.health -= 5;
-              ant.zeroHealth();
-            }
-            break;
+        case COLORS.WALL:
+          let wall = wallItems.find(i => i.x == biteTarget.coord.x && i.y == biteTarget.coord.y);
+          if (wall !== undefined) {
+            wall.health -= 65;
+            ant.decHealth(45);
           }
+          break;
+        case COLORS.TARGET:
+          let tgt = globalTargets.find(i => i.x == biteTarget.coord.x && i.y == biteTarget.coord.y);
+          if (tgt !== undefined) {
+            tgt.health -= 5;
+            ant.zeroHealth();
+          }
+          break;
+        }
       }
     }
     globalMap[ant.x][ant.y] = COLORS.ANT;
@@ -233,12 +192,12 @@ function updateWorld() {
   drawWorld();
   if (tick > config.world.runs || globalTargets.length === 0) {
     if (tick > config.world.runs) {
-      console.log("Congratulations, time ran out!");
+      console.log('Congratulations, time ran out!');
     } else {
-      console.log("You were unable to protect all the targets.");
+      console.log('You were unable to protect all the targets.');
     }
     clearInterval(globalDrawCancellation);
-    showPerformance()
+    showPerformance();
   } else {
     tick += 1;
   }
@@ -247,7 +206,7 @@ function updateWorld() {
 function drawWorld() {
   let subt0 = performance.now();
   clearScreen(backgroundColor);
-  ants.forEach(x => putSizedPixel(x.coord(), antColor(x.health), config.world.factor));
+  ants.forEach(x => putSizedPixel(x.coord(), x.antColor(), config.world.factor));
   wallItems.forEach(x => putSizedPixel(x, [x.health, x.health, 0], config.world.factor));
   permWallItems.forEach(x => putSizedPixel(x, [255, 0, 0], config.world.factor));
   globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, config.world.factor));
@@ -283,9 +242,15 @@ function startMovement(cancellation) {
 function addWall() {
   clickAction = 'add_wall';
 }
+
 function addGun() {
   clickAction = 'add_gun';
 }
+
+function addPermWall() {
+  clickAction = 'add_perm_wall';
+}
+
 
 
 function newWall(x, y, mX, mY) {
@@ -295,17 +260,20 @@ function newWall(x, y, mX, mY) {
 }
 
 function canvasClickHandler(event) {
+  let x = Math.floor(event.layerX / config.world.factor);
+  let y = Math.floor(event.layerY / config.world.factor);
+
   if (clickAction === 'add_wall') {
-    let x = Math.floor(event.layerX / config.world.factor);
-    let y = Math.floor(event.layerY / config.world.factor);
     let p = getMoveOptions({x: x, y: y});
     p.forEach(i => newWall(i.x, i.y, gWidth, gHeight));
   }
-  if (clickAction === 'add_gun') {
-    let x = Math.floor(event.layerX / config.world.factor);
-    let y = Math.floor(event.layerY / config.world.factor);
+  else if (clickAction === 'add_gun') {
     guns.push(new Gun(x, y, gWidth, gHeight));
   }
+  else if (clickAction === 'add_perm_wall') {
+    permWallItems.push({x: x, y: y});
+  }
+
 }
 
 function stopMovement() {
@@ -316,6 +284,7 @@ let drawInterval = setInterval(drawWorld, config.world.timePerRun);
 
 document.getElementById('addWall').addEventListener('mouseup', addWall);
 document.getElementById('addGun').addEventListener('mouseup', addGun);
+document.getElementById('addPermWall').addEventListener('mouseup', addPermWall);
 document.getElementById('canvas').addEventListener('mouseup', canvasClickHandler);
 document.getElementById('start').addEventListener('mouseup', startMovement, drawInterval);
 document.getElementById('stop').addEventListener('mouseup', stopMovement);

@@ -21,6 +21,10 @@ export class Ant {
     this.history = [];
   }
 
+  antColor() {
+    return [255 - this.health, this.health, 0];
+  }
+
   coord() {
     return {x: this.x, y: this.y};
   }

@@ -9,7 +9,7 @@ let config = {
     timePerRun: 60
   }
 
-}
+};
 
 
-export default config
+export default config;

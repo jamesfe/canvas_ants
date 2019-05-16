@@ -1,7 +1,3 @@
-import { Target } from './target.js';
-import { Ant } from './ant.js';
-import { Gun } from './gun.js';
-
 const COLORS = {
   NOTHING: 0,
   WALL: 1,
@@ -68,48 +64,11 @@ export function getEdgeCoordinate(h, w) {
   return ({x: randX, y: randY});
 }
 
-function getRandomCoordinate(h, w) {
+export function getRandomCoordinate(h, w) {
   /* Get a random coordinate. */
   var randX = getRandomInt(0, w);
   var randY = getRandomInt(0, h);
   return ({x: randX, y: randY});
-}
-
-export function initialGlobalTargets(h, w, num, debug) {
-  /* Generate some random targets but otherwise just put one in the middle for debug mode */
-  h -= 1;
-  w -= 1;
-  var tgts = [];
-  if (debug === true) {
-    tgts.push(new Target(Math.floor(w/2), Math.floor(h/2)));
-  } else {
-    for (var i = 0; i < num; i++) {
-      let c = getRandomCoordinate(h * 0.6, w * 0.6);
-      tgts.push(new Target(c.x + (w * 0.2), c.y + (h * 0.2)));
-    }
-  }
-  return (tgts);
-}
-
-export function initialAnts(h, w, tgts, type, num) {
-  /* Generate some initial ants */
-  h -= 1;
-  w -= 1;
-  var a = [];
-  var c = {x: 0, y: 0};
-  for (var i = 0; i < num; i++) {
-    switch (type) {
-    case 'edge':
-      c = getEdgeCoordinate(h, w);
-      break;
-    case 'rand':
-      c = getRandomCoordinate(h, w);
-      break;
-    }
-    a.push(new Ant(c.x, c.y, w, h));
-    a[i].registerTargets(tgts);
-  }
-  return (a);
 }
 
 export function newMat(h, w) {
@@ -135,17 +94,7 @@ export function getMoveOptions(coord) {
   return (retVals);
 }
 
-export function initialGuns(h, w, num, range) {
-  /* Generate some initial guns */
-  h -= 1;
-  w -= 1;
-
-  var a = [];
-  var c = {x: 0, y: 0};
-  for (var i = 0; i < num; i++) {
-      c = getRandomCoordinate(h, w);
-    a.push(new Gun(c.x, c.y, w, h, range));
-  }
-  return (a);
-
+export function round(x) {
+  return Math.floor(x);
 }
+

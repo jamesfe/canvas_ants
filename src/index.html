@@ -4,11 +4,17 @@
   border: 1px solid black;
 }
 body {
-    background-color: #000;
+  background-color: #000;
+  color: white;
+  font-family: Helvetica;
 }
 #canvas {
     border: 3px solid blue;
 }
+.tickText {
+  color: white;
+}
+
 </style>
   <canvas id="canvas" height="900" width="900" class="field"></canvas>
   <script type="module" src="main.js"> </script>
@@ -18,4 +24,7 @@ body {
   <button id="addPermWall">Add Permanent Wall</button>
   <button id="start">Start</button>
   <button id="stop">Stop</button>
+  <div>Cycle: <span id="tickDisplay" class="tickText">...0...</span></div>
+  <div>Ants Killed: <span id="antsKilledDisplay" class="tickText">...0...</span></div>
+  <div>Budget: <span id="budgetDisplay" class="tickText">...0...</span></div>
 </html>

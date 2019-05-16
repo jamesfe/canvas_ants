@@ -2,6 +2,8 @@ import {
   getRandomInt,
   COLORS } from './utils.js';
 
+import config from './config.js';
+
 export class Gun {
 
   constructor(x, y, maxX, maxY, range) {
@@ -10,7 +12,7 @@ export class Gun {
     this.maxX = maxX;
     this.maxY = maxY;
     this.moment = 0;
-    this.rate = 2;
+    this.rate = config.guns.firingRate;
     this.angle = getRandomInt(0, 57);
     this.range = range;
   }

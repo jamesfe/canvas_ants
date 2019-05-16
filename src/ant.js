@@ -1,5 +1,7 @@
 import {COLORS, getDistance, getRelativeDistance, getRandomInt, sameCoord} from './utils.js';
 
+import config from './config.js';
+
 export class Ant {
 
   constructor(x, y, maxX, maxY, tick) {
@@ -12,7 +14,7 @@ export class Ant {
     // Things that aren't static this.maxX = maxX; this.maxY = maxY;
     this.speedPerTick = 1; // TODO: Integrate this into movement.
     this.lastTick = undefined || 0;
-    this.health = 255;
+    this.health = config.ant.startingHealth;
     this.x = x;
     this.y = y;
     this.maxDist = getDistance({x: 0, y: 0}, {x: maxX, y: maxY});
@@ -22,7 +24,8 @@ export class Ant {
   }
 
   antColor() {
-    return [255 - this.health, this.health, 0];
+    let finColor = (255 * this.health) / config.ant.startingHealth;
+    return [255 - finColor, finColor, 0];
   }
 
   coord() {

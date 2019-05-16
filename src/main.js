@@ -26,6 +26,8 @@ let numAntsPerCycle = 1;
 var started = false;
 var globalDrawCancellation = undefined;
 var tick = 0;
+var antsKilled = 0;
+var budget = 200.0;
 var clickAction = 'nothing';
 var numAnts = 1;
 var numGlobalTargets = 5;
@@ -78,6 +80,11 @@ var wallItems = buildWallItems(gWidth, gHeight, []);
 var updates = [];
 var draws = [];
 
+/* DOM elements */
+let domTickDisplay = document.getElementById('tickDisplay');
+let domAntsKilled = document.getElementById('antsKilledDisplay');
+let domBudgetDisplay = document.getElementById('budgetDisplay');
+
 function updateWorld() {
   /* Deal with the business logic of the game. */
 
@@ -103,7 +110,11 @@ function updateWorld() {
   permWallItems.forEach(x => globalMap[x.x][x.y] = COLORS.PERMWALL);
   wallItems = wallItems.filter(x => x.health > 0);
   wallItems.forEach(x => globalMap[x.x][x.y] = COLORS.WALL);
+  let prevAnts = ants.length;
   ants = ants.filter(x => x.health > 0);
+  let thisCycleAntsDead = prevAnts - ants.length;
+  antsKilled += thisCycleAntsDead;
+  budget += thisCycleAntsDead * 0.1;
   ants.forEach(x => globalMap[x.x][x.y] = COLORS.ANT);
 
   // Now make some moves
@@ -158,7 +169,7 @@ function updateWorld() {
       let bColor = globalMap[bc.x][bc.y];
       bullet.live(bColor);
       if (bColor === COLORS.ANT) {
-        ants.filter(a => (a.x === bc.x) && (a.y === bc.y)).forEach(a => a.decHealth(200));
+        ants.filter(a => (a.x === bc.x) && (a.y === bc.y)).forEach(a => a.decHealth(config.guns.bulletDamage));
         bullet.dead = true;
       }
     }
@@ -167,11 +178,14 @@ function updateWorld() {
   bullets = bullets.filter(x => x.dead === false);
 
   // numAntsPerCycle = Math.floor(tick / 100);
-  if (tick % 200 === 0) {
+
+  domUpdate();
+  if (tick % 100 === 0) {
     numAntsPerCycle = tick;
   } else {
     numAntsPerCycle = 0;
   }
+
 
   for (var i = 0; i < numAntsPerCycle; i++) {
     let a = generateNewAnt();
@@ -179,13 +193,6 @@ function updateWorld() {
       ants.push(a);
     }
   }
-  /*
-  for (var i = 0; i < 5; i++) {
-    let a = generateSpecificAnt(60 + getRandomInt(0, 5), 60 + getRandomInt(0, 5));
-    if (a !== undefined) {
-      ants.push(a);
-    }
-  }*/
 
   let subt1 = performance.now();
   updates.push(subt1-subt0);
@@ -229,6 +236,14 @@ function showPerformance() {
   console.log('Average draws: ', avgDraw, ' first: ', draws[0], ' last: ', draws[draws.length - 1]);
 }
 
+function domUpdate() {
+  /* DOM Updates */
+  domTickDisplay.innerHTML = tick;
+  domAntsKilled.innerHTML = antsKilled;
+  domBudgetDisplay.innerHTML = budget.toFixed(1);
+
+}
+
 function startMovement(cancellation) {
   if (started === false) {
     started = true;
@@ -263,17 +278,20 @@ function canvasClickHandler(event) {
   let x = Math.floor(event.layerX / config.world.factor);
   let y = Math.floor(event.layerY / config.world.factor);
 
-  if (clickAction === 'add_wall') {
+  if ((clickAction === 'add_wall') && (budget >= config.prices.wall)) {
     let p = getMoveOptions({x: x, y: y});
     p.forEach(i => newWall(i.x, i.y, gWidth, gHeight));
+    budget -= config.prices.wall;
   }
-  else if (clickAction === 'add_gun') {
+  else if ((clickAction === 'add_gun') && (budget >= config.prices.gun)){
     guns.push(new Gun(x, y, gWidth, gHeight));
+    budget -= config.prices.gun;
   }
-  else if (clickAction === 'add_perm_wall') {
+  else if ((clickAction === 'add_perm_wall') && (budget >= config.prices.permWall)) {
     permWallItems.push({x: x, y: y});
+    budget -= config.prices.permWall;
   }
-
+  domUpdate();
 }
 
 function stopMovement() {
@@ -290,3 +308,4 @@ document.getElementById('start').addEventListener('mouseup', startMovement, draw
 document.getElementById('stop').addEventListener('mouseup', stopMovement);
 
 // startMovement();
+domUpdate();

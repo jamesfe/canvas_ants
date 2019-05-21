@@ -13,7 +13,7 @@ export class Gun {
     this.maxY = maxY;
     this.moment = 0;
     this.rate = config.guns.firingRate;
-    this.angle = getRandomInt(0, 57);
+    this.angle = getRandomInt(0, Math.PI * 2);
     if (range === undefined) {
       this.range = config.guns.gunRange;
     }
@@ -35,7 +35,6 @@ export class Gun {
       // 57 is 180 / pi and rounded
       // let angle = getRandomInt(0, 57);
       let tolerance = Math.PI * 0.05;
-      // let angle = Math.atan2(this.x - inputAnt.x, this.y - inputAnt.y) + (this.getRandomArbitrary(-1 * tolerance, tolerance));
       let angle = Math.atan2(inputAnt.y - this.y, inputAnt.x - this.x) + (this.getRandomArbitrary(-1 * tolerance, tolerance));
       return(new Bullet(this.x, this.y, this.maxX, this.maxY, angle, this.range));
     }
@@ -48,8 +47,8 @@ export class Bullet {
   constructor(x, y, maxX, maxY, angle, range) {
     this.x = x;
     this.y = y;
-    this.maxX = maxX;
-    this.maxY = maxY;
+    this.maxX = maxX + 1; // TODO: the +1 is a symptom of some other bugs, it is tech debt
+    this.maxY = maxY + 1;
     this.angle = angle;
     this.age = 0;
     this.dead = false;
@@ -70,7 +69,7 @@ export class Bullet {
       this.dead = true;
       return (undefined);
     }
-    if ((this.x <= 0) || (this.y <= 0) || (this.y >= this.maxY) || (this.x >= this.maxX)) {
+    if ((this.x < 0) || (this.y < 0) || (this.y > this.maxY) || (this.x > this.maxX)) {
       this.dead = true;
       return (undefined);
     }

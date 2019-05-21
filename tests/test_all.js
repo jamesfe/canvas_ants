@@ -1,7 +1,8 @@
 import { assertEqual, assertNotEqual } from './utils.js';
 import {
   sameColor,
-  getDistance } from '../src/utils.js';
+  getDistance,
+  roundToDigits } from '../src/utils.js';
 
 let tests = {
   testThingsEqual: function () {
@@ -17,7 +18,14 @@ let tests = {
   testGetDistance: function() {
     // TODO: Strengthen
     assertEqual(getDistance({x: 1, y: 0}, {x: 5, y: 0}), 4);
-  }
+    assertEqual(roundToDigits(getDistance({x: 50, y: 50}, {x: 5, y: 0}), 4), 67.2681);
+    assertEqual(roundToDigits(getDistance({x: 5, y: 0}, {x: 50, y: 50}), 4), 67.2681);
+  },
+  testRoundToDigits: function() {
+    assertEqual(roundToDigits(4.12345, 3), 4.123);
+    assertEqual(roundToDigits(4, 3), 4);
+}
+
 };
 
 var resultTable = document.getElementById('resultTable');

@@ -9,9 +9,16 @@ const COLORS = {
 export { COLORS };
 
 
+export function getRandomNum(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 export function getRandomInt(min, max) {
   /* Returns a random number, inclusive of min and max */
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive
+  // return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 export function sameColor(c1, c2) {
@@ -95,6 +102,9 @@ export function getMoveOptions(coord) {
 }
 
 export function round(x) {
-  return Math.floor(x);
+  return Math.round(x);
 }
 
+export function roundToDigits(x, numDigits) {
+  return Math.round(x * Math.pow(10, numDigits)) / Math.pow(10, numDigits);
+}

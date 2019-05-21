@@ -29,13 +29,12 @@ var started = false;
 var globalDrawCancellation = undefined;
 var tick = 0;
 var antsKilled = 0;
-var budget = 10000.0;
+var budget = config.budget.startingBudget;
 var clickAction = 'nothing';
 var numAnts = 1;
-var numGlobalTargets = 5;
 var canvas = document.getElementById('canvas');
-var height = canvas.height;
-var width = canvas.width;
+canvas.height = config.world.height;
+canvas.width = config.world.width;
 
 var gHeight = Math.floor(canvas.height / config.world.factor);
 var gWidth = Math.floor(canvas.width / config.world.factor);
@@ -67,18 +66,17 @@ function putSingleSizedPixel(coord, col, s, size) {
 
 function clearScreen(col) {
   ctx.fillStyle = 'rgba('+col[0]+','+col[1]+','+col[2]+',255)';
-  ctx.fillRect(0, 0, width, height);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 /* Initialize all the various items on the map */
-var globalTargets = initialGlobalTargets(gHeight, gWidth, numGlobalTargets, false);
+var globalTargets = initialGlobalTargets(gHeight, gWidth, config.world.initialTargets, false);
 var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
 var guns = initialGuns(gHeight, gWidth, config.guns.numGuns, config.guns.gunRange);
 var bullets = [];
-// buildPermRuins(gWidth, gHeight, []);
-var permWallItems = buildPermWall(gWidth, gHeight, []);
-// buildWallRuins(gWidth, gHeight, []);
-var wallItems = buildWallItems(gWidth, gHeight, []);
+// var permWallItems = buildPermWall(gWidth, gHeight, []);
+var permWallItems = buildPermRuins(gWidth, gHeight, []);
+var wallItems = []; // buildWallItems(gWidth, gHeight, []);
 
 var updates = [];
 var draws = [];
@@ -183,12 +181,11 @@ function updateWorld() {
   // numAntsPerCycle = Math.floor(tick / 100);
 
   domUpdate();
-  if ((tick % 100 === 0) && (tick % 1500 !== 0) && (tick <= 4500)) {
+  if ((tick % config.world.spawnCycle === 0) && (tick % config.world.restCycle !== 0) && (tick <= 4500)) {
     numAntsPerCycle = tick;
   } else {
     numAntsPerCycle = 0;
   }
-
 
   for (var i = 0; i < numAntsPerCycle; i++) {
     let a = generateNewAnt();
@@ -274,8 +271,6 @@ function addGun() {
 function addPermWall() {
   clickAction = 'add_perm_wall';
 }
-
-
 
 function newWall(x, y, mX, mY) {
   if (x < mX && y < mY && x > 0 && y > 0 && wallItems.find(i => i.x === x && i.y === y) === undefined) {

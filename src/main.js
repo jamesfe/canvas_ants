@@ -286,7 +286,7 @@ function newWall(x, y, mX, mY) {
 
 // TODO move this max diagonal distance elsewhere (precompute somewhereE)
 let maxRelDist = getRelativeDistance({x: 0, y: 0}, {x: gWidth, y: gHeight})
-function distanceToClosestTarget(x, y) {
+function distanceToClosestTarget(x, y, maxDist) {
   return globalTargets
       .map(i => {
         let b = {dist: getRelativeDistance({x: x, y: y}, i.coord()), t: i};
@@ -318,7 +318,7 @@ function canvasClickHandler(event) {
       permWallItems.push({x: x, y: y});
       budget -= config.prices.permWall;
     }
-    let pp = distanceToClosestTarget(x, y);
+    let pp = distanceToClosestTarget(x, y, maxRelDist);
     // TODO: just get the distance, not the target
     console.log(pp);
   }

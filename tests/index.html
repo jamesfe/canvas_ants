@@ -1,0 +1,43 @@
+<html>
+
+<style>
+body {
+  font-family: Helvetica;
+}
+.passed {
+  color: green;
+  font-weight: bold;
+}
+.failed {
+  color: red;
+  font-weight: bold;
+}
+.resultHeader {
+  font-weight: bold;
+}
+
+table {
+  border-collapse: collapse;
+}
+th {
+  background: #dfdfdf;
+}
+
+th, td {
+  border: 2px solid black;
+  padding: 5px;
+}
+
+</style>
+
+
+<script type="module" src="test_all.js"> </script>
+
+<table id="resultTable" border=2>
+  <tr class="resultHeader">
+    <th width="20%">test name</td>
+    <th width="80%">test results</td>
+  </tr>
+</table>
+
+</html>

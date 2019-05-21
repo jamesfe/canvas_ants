@@ -14,6 +14,9 @@ export class Gun {
     this.moment = 0;
     this.rate = config.guns.firingRate;
     this.angle = getRandomInt(0, 57);
+    if (range === undefined) {
+      this.range = config.guns.gunRange;
+    }
     this.range = range;
   }
 

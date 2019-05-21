@@ -6,6 +6,8 @@ import {
   newMat } from './utils.js';
 
 import {
+  buildPermRuins,
+  buildWallRuins,
   initialAnts,
   initialGuns,
   initialGlobalTargets,
@@ -27,7 +29,7 @@ var started = false;
 var globalDrawCancellation = undefined;
 var tick = 0;
 var antsKilled = 0;
-var budget = 200.0;
+var budget = 10000.0;
 var clickAction = 'nothing';
 var numAnts = 1;
 var numGlobalTargets = 5;
@@ -73,8 +75,9 @@ var globalTargets = initialGlobalTargets(gHeight, gWidth, numGlobalTargets, fals
 var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
 var guns = initialGuns(gHeight, gWidth, config.guns.numGuns, config.guns.gunRange);
 var bullets = [];
-
+// buildPermRuins(gWidth, gHeight, []);
 var permWallItems = buildPermWall(gWidth, gHeight, []);
+// buildWallRuins(gWidth, gHeight, []);
 var wallItems = buildWallItems(gWidth, gHeight, []);
 
 var updates = [];
@@ -114,7 +117,7 @@ function updateWorld() {
   ants = ants.filter(x => x.health > 0);
   let thisCycleAntsDead = prevAnts - ants.length;
   antsKilled += thisCycleAntsDead;
-  budget += thisCycleAntsDead * 0.1;
+  budget += thisCycleAntsDead * config.budget.antBudgetRate;
   ants.forEach(x => globalMap[x.x][x.y] = COLORS.ANT);
 
   // Now make some moves
@@ -180,7 +183,7 @@ function updateWorld() {
   // numAntsPerCycle = Math.floor(tick / 100);
 
   domUpdate();
-  if (tick % 100 === 0) {
+  if ((tick % 100 === 0) && (tick % 1500 !== 0) && (tick <= 4500)) {
     numAntsPerCycle = tick;
   } else {
     numAntsPerCycle = 0;
@@ -236,8 +239,14 @@ function showPerformance() {
   console.log('Average draws: ', avgDraw, ' first: ', draws[0], ' last: ', draws[draws.length - 1]);
 }
 
+function buttonPriceUpdate() {
+  document.getElementById('addWall').innerHTML = 'Add Wall (' + config.prices.wall.toString() + ')';
+  document.getElementById('addGun').innerHTML = 'Add Gun (' + config.prices.gun.toString() + ')';
+  document.getElementById('addPermWall').innerHTML = 'Add Permanent Wall (' + config.prices.permWall.toString() + ')';
+}
+
 function domUpdate() {
-  /* DOM Updates */
+  /* DOM Updates: Show scores, tick counter, etc. */
   domTickDisplay.innerHTML = tick;
   domAntsKilled.innerHTML = antsKilled;
   domBudgetDisplay.innerHTML = budget.toFixed(1);
@@ -274,22 +283,44 @@ function newWall(x, y, mX, mY) {
   }
 }
 
-function canvasClickHandler(event) {
-  let x = Math.floor(event.layerX / config.world.factor);
-  let y = Math.floor(event.layerY / config.world.factor);
 
+// TODO move this max diagonal distance elsewhere (precompute somewhereE)
+let maxRelDist = getRelativeDistance({x: 0, y: 0}, {x: gWidth, y: gHeight})
+function distanceToClosestTarget(x, y) {
+  return globalTargets
+      .map(i => {
+        let b = {dist: getRelativeDistance({x: x, y: y}, i.coord()), t: i};
+        return b;
+      })
+      .reduce(
+        (a, b) => (a.dist < b.dist ? a: b),
+        {dist: maxRelDist}).t;
+}
+
+
+function canvasClickHandler(event) {
+  let x = Math.round(event.layerX / config.world.factor) - 1;
+  let y = Math.round(event.layerY / config.world.factor) - 1;
   if ((clickAction === 'add_wall') && (budget >= config.prices.wall)) {
     let p = getMoveOptions({x: x, y: y});
     p.forEach(i => newWall(i.x, i.y, gWidth, gHeight));
     budget -= config.prices.wall;
   }
   else if ((clickAction === 'add_gun') && (budget >= config.prices.gun)){
-    guns.push(new Gun(x, y, gWidth, gHeight));
-    budget -= config.prices.gun;
+
+    if (guns.find(b => (b.x === x && b.y === y)) === undefined) {
+      guns.push(new Gun(x, y, gWidth, gHeight, config.guns.gunRange));
+      budget -= config.prices.gun;
+    }
   }
   else if ((clickAction === 'add_perm_wall') && (budget >= config.prices.permWall)) {
-    permWallItems.push({x: x, y: y});
-    budget -= config.prices.permWall;
+    if (permWallItems.find(b => (b.x === x && b.y === y)) === undefined) {
+      permWallItems.push({x: x, y: y});
+      budget -= config.prices.permWall;
+    }
+    let pp = distanceToClosestTarget(x, y);
+    // TODO: just get the distance, not the target
+    console.log(pp);
   }
   domUpdate();
 }
@@ -309,3 +340,4 @@ document.getElementById('stop').addEventListener('mouseup', stopMovement);
 
 // startMovement();
 domUpdate();
+buttonPriceUpdate();

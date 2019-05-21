@@ -60,10 +60,33 @@ export function initialGuns(h, w, num, range) {
 
 }
 
+export function buildPermRuins(w, h, items) {
+  for (var x = 0; x < w; x++) {
+    for (var y = 0; y < h; y++) {
+      if (getRandomInt(0, 30) === 0) {
+        items.push({x: x, y: y});
+      }
+    }
+  }
+  return (items);
+}
+
+export function buildWallRuins(w, h, items) {
+  /* Act on wallItems array as a side-effect */
+  for (var x = 0; x < w; x ++) {
+    for (var y = 0; y < h; y ++) {
+      if (getRandomInt(0, 10) === 0) {
+        items.push({x: x, y: y, health: 255});
+      }
+    }
+  }
+  return (items);
+}
+
 export function buildPermWall(w, h, items) {
   /* call-by-sharing means items is altered */
   for (var x = 0; x < w; x++ ) {
-    if (getRandomInt(0, 3) === 1) {
+    if (getRandomInt(0, 2) === 1) {
       items.push({x: x, y: round(h / 4)});
       items.push({x: x, y: round(h / 2)});
       items.push({y: x, x: round(h / 4)});

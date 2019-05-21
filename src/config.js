@@ -1,24 +1,26 @@
 let config = {
   guns: {
     gunRange: 25,
-    numGuns: 200,
+    numGuns: 0,
     bulletDamage: 101,
     firingRate: 2
   },
   world: {
     factor: 6,
-    runs: 4000,
+    runs: 5000,
     timePerRun: 60
   },
   ant: {
-    startingHealth: 300
+    startingHealth: 100
   },
   prices: {
-    gun: 50,
+    gun: 25,
     permWall: 100,
     wall: 5
+  },
+  budget: {
+    antBudgetRate: 0.0
   }
-
 };
 
 

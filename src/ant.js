@@ -136,8 +136,6 @@ export class Ant {
 
   setTarget() {
     /* Find the closest target out of a list of targets and set it as the primary target. */
-    // var minDist = this.maxRelDist;
-    // var minTarget = undefined;
     this.closestTarget = this.targets
       .map(i => {
         let b = {dist: getRelativeDistance(this.coord(), i.coord()), t: i};

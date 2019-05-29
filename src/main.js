@@ -16,8 +16,16 @@ import {
 
 import config from './config.js';
 
+import { World } from './world.js';
 import { Ant } from './ant.js';
 import { Gun } from './gun.js';
+
+
+var canvas = document.getElementById('canvas');
+canvas.height = config.world.height;
+canvas.width = config.world.width;
+
+var world = new World(canvas, config);
 
 let targetColor = [0, 0, 255];
 let gunColor = [255, 255, 255];
@@ -27,14 +35,7 @@ let backgroundColor = [0, 0, 0];
 let numAntsPerCycle = 1;
 var started = false;
 var globalDrawCancellation = undefined;
-var tick = 0;
-var antsKilled = 0;
-var budget = config.budget.startingBudget;
 var clickAction = 'nothing';
-var numAnts = 1;
-var canvas = document.getElementById('canvas');
-canvas.height = config.world.height;
-canvas.width = config.world.width;
 
 var gHeight = Math.floor(canvas.height / config.world.factor);
 var gWidth = Math.floor(canvas.width / config.world.factor);
@@ -70,16 +71,13 @@ function clearScreen(col) {
 }
 
 /* Initialize all the various items on the map */
-var globalTargets = initialGlobalTargets(gHeight, gWidth, config.world.initialTargets, false);
-var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
-var guns = initialGuns(gHeight, gWidth, config.guns.numGuns, config.guns.gunRange);
-var bullets = [];
+// var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
 // var permWallItems = buildPermWall(gWidth, gHeight, []);
 var permWallItems = buildPermRuins(gWidth, gHeight, []);
 var wallItems = []; // buildWallItems(gWidth, gHeight, []);
 
-var updates = [];
-var draws = [];
+// var updates = [];
+// var draws = [];
 
 /* DOM elements */
 let domTickDisplay = document.getElementById('tickDisplay');
@@ -100,8 +98,7 @@ function updateWorld() {
     return (a);
   }
 
-  let subt0 = performance.now();
-  var globalMap = newMat(gHeight, gWidth);
+  // var globalMap = newMat(gHeight, gWidth);
   // Register on global map
   var updateTargets = false;
   let preLength = globalTargets.length;
@@ -111,13 +108,7 @@ function updateWorld() {
   permWallItems.forEach(x => globalMap[x.x][x.y] = COLORS.PERMWALL);
   wallItems = wallItems.filter(x => x.health > 0);
   wallItems.forEach(x => globalMap[x.x][x.y] = COLORS.WALL);
-  let prevAnts = ants.length;
-  ants = ants.filter(x => x.health > 0);
-  let thisCycleAntsDead = prevAnts - ants.length;
-  antsKilled += thisCycleAntsDead;
-  budget += thisCycleAntsDead * config.budget.antBudgetRate;
-  ants.forEach(x => globalMap[x.x][x.y] = COLORS.ANT);
-
+  // REFACTOR removed ants from this
   // Now make some moves
   ants.forEach(ant => {
     /* We remove the ant from the global map */
@@ -178,25 +169,12 @@ function updateWorld() {
   });
   bullets = bullets.filter(x => x.dead === false);
 
-  // numAntsPerCycle = Math.floor(tick / 100);
+  // domUpdate();
+  // TODO: Uncomment this later
 
-  domUpdate();
-  if ((tick % config.world.spawnCycle === 0) && (tick % config.world.restCycle !== 0) && (tick <= 4500)) {
-    numAntsPerCycle = tick;
-  } else {
-    numAntsPerCycle = 0;
-  }
 
-  for (var i = 0; i < numAntsPerCycle; i++) {
-    let a = generateNewAnt();
-    if (a !== undefined) {
-      ants.push(a);
-    }
-  }
-
-  let subt1 = performance.now();
-  updates.push(subt1-subt0);
   drawWorld();
+
   if (tick > config.world.runs || globalTargets.length === 0) {
     if (tick > config.world.runs) {
       console.log('Congratulations, time ran out!');
@@ -204,14 +182,12 @@ function updateWorld() {
       console.log('You were unable to protect all the targets.');
     }
     clearInterval(globalDrawCancellation);
-    showPerformance();
   } else {
     tick += 1;
   }
 }
 
 function drawWorld() {
-  let subt0 = performance.now();
   clearScreen(backgroundColor);
   ants.forEach(x => putSizedPixel(x.coord(), x.antColor(), config.world.factor));
   wallItems.forEach(x => putSizedPixel(x, [x.health, x.health, 0], config.world.factor));
@@ -224,16 +200,6 @@ function drawWorld() {
       putSingleSizedPixel(x.coord(), bulletColor, config.world.factor, 2);
     }
   });
-  let subt1 = performance.now();
-  draws.push(subt1-subt0);
-}
-
-function showPerformance() {
-  let avgUpdate = updates.reduce((a, b) => a + b, 0) / updates.length;
-  console.log('Average update: ', avgUpdate, ' first: ', updates[0], ' last: ', updates[updates.length - 1]);
-
-  let avgDraw = draws.reduce((a, b) => a + b, 0) / draws.length;
-  console.log('Average draws: ', avgDraw, ' first: ', draws[0], ' last: ', draws[draws.length - 1]);
 }
 
 function buttonPriceUpdate() {
@@ -244,7 +210,7 @@ function buttonPriceUpdate() {
 
 function domUpdate() {
   /* DOM Updates: Show scores, tick counter, etc. */
-  domTickDisplay.innerHTML = tick;
+  domTickDisplay.innerHTML = world.tick;
   domAntsKilled.innerHTML = antsKilled;
   domBudgetDisplay.innerHTML = budget.toFixed(1);
 
@@ -334,5 +300,5 @@ document.getElementById('start').addEventListener('mouseup', startMovement, draw
 document.getElementById('stop').addEventListener('mouseup', stopMovement);
 
 // startMovement();
-domUpdate();
+// domUpdate();
 buttonPriceUpdate();

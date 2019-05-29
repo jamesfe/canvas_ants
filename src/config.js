@@ -10,6 +10,7 @@ let config = {
     runs: 5000,
     timePerRun: 60,
     initialTargets: 5,    // how many targets do we start with
+    initialAnts: 1,
     width: 900,
     height: 900,
     spawnCycle: 50,       // How often do ants spawn

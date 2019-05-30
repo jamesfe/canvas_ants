@@ -38,6 +38,7 @@ export class Ant {
      * 1. Do not calculate smartHeadToTarget if not necessary
      * 2. Do not calculate biting targets unless it is necessary
      *
+     * Returns true or false: true if we move, false if we bite
      * */
     this.biteTarget = undefined;
     var choice = this.smartHeadToTarget();

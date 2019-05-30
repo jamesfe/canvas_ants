@@ -78,10 +78,6 @@ export function getRandomCoordinate(h, w) {
   return ({x: randX, y: randY});
 }
 
-export function newMat(h, w) {
-  return (new Array(h).fill([]).map(x => Array(w).fill(0)));
-}
-
 export function getMoveOptions(coord) {
   /* Given a {x: 1, y: 2} style object, find the adjacent cells. */
   let x = coord.x;

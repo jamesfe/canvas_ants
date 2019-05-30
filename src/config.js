@@ -1,7 +1,7 @@
 let config = {
   guns: {
     gunRange: 25,
-    numGuns: 150,
+    numGuns: 0,
     bulletDamage: 101,
     firingRate: 2
   },
@@ -9,7 +9,7 @@ let config = {
     factor: 6,
     runs: 5000,
     timePerRun: 60,
-    initialTargets: 5,    // how many targets do we start with
+    initialTargets: 1,    // how many targets do we start with
     initialAnts: 1,
     width: 900,
     height: 900,

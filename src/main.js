@@ -2,8 +2,7 @@ import {
   getEdgeCoordinate,
   COLORS,
   getMoveOptions,
-  getRelativeDistance,
-  newMat } from './utils.js';
+  getRelativeDistance } from './utils.js';
 
 import {
   buildPermRuins,
@@ -42,15 +41,6 @@ var gWidth = Math.floor(canvas.width / config.world.factor);
 var ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-function getTempContext(inArr, h, w, matrix) {
-  /* Given a matrix from getMoveOptions, check the matrix for valid moves.
-    * Return a list of the colors and coordinates for each. */
-  let validLocs = inArr
-    .filter(a => a.x >= 0 && a.x < w && a.y >= 0 && a.y < h)
-    .map(a => { return ({color: matrix[a.x][a.y], coord: a}); });
-  // We cannot move into walls or other ants, for now we say we can only move into "nothing"
-  return (validLocs);
-}
 
 function putSizedPixel(coord, col, s) {
   /* Put a pixel with size s on the world map.*/
@@ -80,15 +70,14 @@ function updateWorld() {
   world.updateWorld();
   drawWorld();
 
-  if (tick > config.world.runs || globalTargets.length === 0) {
-    if (tick > config.world.runs) {
+  // TODO: Refactor this into world
+  if (world.tick > config.world.runs || world.globalTargets.length === 0) {
+    if (world.tick > config.world.runs) {
       console.log('Congratulations, time ran out!');
     } else {
       console.log('You were unable to protect all the targets.');
     }
     clearInterval(globalDrawCancellation);
-  } else {
-    tick += 1;
   }
 }
 
@@ -116,8 +105,8 @@ function buttonPriceUpdate() {
 function domUpdate() {
   /* DOM Updates: Show scores, tick counter, etc. */
   domTickDisplay.innerHTML = world.tick;
-  domAntsKilled.innerHTML = antsKilled;
-  domBudgetDisplay.innerHTML = budget.toFixed(1);
+  domAntsKilled.innerHTML = world.antsKilled;
+  domBudgetDisplay.innerHTML = world.budget.toFixed(1);
 
 }
 
@@ -153,7 +142,8 @@ function newWall(x, y, mX, mY) {
 // TODO move this max diagonal distance elsewhere (precompute somewhereE)
 let maxRelDist = getRelativeDistance({x: 0, y: 0}, {x: gWidth, y: gHeight})
 function distanceToClosestTarget(x, y, maxDist) {
-  return globalTargets
+  // TODO: move this into the world Class
+  return world.globalTargets
       .map(i => {
         let b = {dist: getRelativeDistance({x: x, y: y}, i.coord()), t: i};
         return b;
@@ -167,22 +157,21 @@ function distanceToClosestTarget(x, y, maxDist) {
 function canvasClickHandler(event) {
   let x = Math.round(event.layerX / config.world.factor) - 1;
   let y = Math.round(event.layerY / config.world.factor) - 1;
-  if ((clickAction === 'add_wall') && (budget >= config.prices.wall)) {
+  if ((clickAction === 'add_wall') && (world.budget >= config.prices.wall)) {
     let p = getMoveOptions({x: x, y: y});
     p.forEach(i => newWall(i.x, i.y, gWidth, gHeight));
-    budget -= config.prices.wall;
+    world.budget -= config.prices.wall;
   }
-  else if ((clickAction === 'add_gun') && (budget >= config.prices.gun)){
-
-    if (guns.find(b => (b.x === x && b.y === y)) === undefined) {
-      guns.push(new Gun(x, y, gWidth, gHeight, config.guns.gunRange));
-      budget -= config.prices.gun;
+  else if ((clickAction === 'add_gun') && (world.budget >= config.prices.gun)){
+    if (world.guns.find(b => (b.x === x && b.y === y)) === undefined) {
+      world.guns.push(new Gun(x, y, gWidth, gHeight, config.guns.gunRange));
+      world.budget -= config.prices.gun;
     }
   }
-  else if ((clickAction === 'add_perm_wall') && (budget >= config.prices.permWall)) {
-    if (permWallItems.find(b => (b.x === x && b.y === y)) === undefined) {
-      permWallItems.push({x: x, y: y});
-      budget -= config.prices.permWall;
+  else if ((clickAction === 'add_perm_wall') && (world.budget >= config.prices.permWall)) {
+    if (world.permWallItems.find(b => (b.x === x && b.y === y)) === undefined) {
+      world.permWallItems.push({x: x, y: y});
+      world.budget -= config.prices.permWall;
     }
     let pp = distanceToClosestTarget(x, y, maxRelDist);
     // TODO: just get the distance, not the target
@@ -205,5 +194,5 @@ document.getElementById('start').addEventListener('mouseup', startMovement, draw
 document.getElementById('stop').addEventListener('mouseup', stopMovement);
 
 startMovement();
-// domUpdate();
+domUpdate();
 buttonPriceUpdate();

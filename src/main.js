@@ -32,7 +32,6 @@ let gunColor = [255, 255, 255];
 let bulletColor = gunColor;
 let backgroundColor = [0, 0, 0];
 
-let numAntsPerCycle = 1;
 var started = false;
 var globalDrawCancellation = undefined;
 var clickAction = 'nothing';
@@ -70,15 +69,6 @@ function clearScreen(col) {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-/* Initialize all the various items on the map */
-// var ants = initialAnts(gHeight, gWidth, globalTargets, 'rand', numAnts);
-// var permWallItems = buildPermWall(gWidth, gHeight, []);
-var permWallItems = buildPermRuins(gWidth, gHeight, []);
-var wallItems = []; // buildWallItems(gWidth, gHeight, []);
-
-// var updates = [];
-// var draws = [];
-
 /* DOM elements */
 let domTickDisplay = document.getElementById('tickDisplay');
 let domAntsKilled = document.getElementById('antsKilledDisplay');
@@ -87,92 +77,7 @@ let domBudgetDisplay = document.getElementById('budgetDisplay');
 function updateWorld() {
   /* Deal with the business logic of the game. */
 
-  function generateNewAnt() {
-    /* Generate a new ant from the edge and return it. */
-    var c = getEdgeCoordinate(gHeight, gWidth);
-    while (globalMap[c.x][c.y] !== COLORS.NOTHING) {
-      c = getEdgeCoordinate(gHeight, gWidth);
-    }
-    let a = new Ant(c.x, c.y, gWidth, gHeight);
-    a.registerTargets(globalTargets);
-    return (a);
-  }
-
-  // var globalMap = newMat(gHeight, gWidth);
-  // Register on global map
-  var updateTargets = false;
-  let preLength = globalTargets.length;
-  globalTargets = globalTargets.filter(x => x.health > 0);
-  updateTargets = (preLength !== globalTargets.length);
-  globalTargets.forEach(x => globalMap[x.x][x.y] = COLORS.TARGET);
-  permWallItems.forEach(x => globalMap[x.x][x.y] = COLORS.PERMWALL);
-  wallItems = wallItems.filter(x => x.health > 0);
-  wallItems.forEach(x => globalMap[x.x][x.y] = COLORS.WALL);
-  // REFACTOR removed ants from this
-  // Now make some moves
-  ants.forEach(ant => {
-    /* We remove the ant from the global map */
-    if (updateTargets === true) {
-      ant.registerTargets(globalTargets);
-    }
-    let x = ant.x;
-    let y = ant.y;
-    globalMap[x][y] = COLORS.NOTHING;
-    ant.updateTempContext(getTempContext(getMoveOptions(ant.coord()), gHeight, gWidth, globalMap));
-    // This next line updates biteTarget
-    let hasMoved = ant.chooseNextPath(tick);
-
-    if (hasMoved === false) {
-      // bite logic differs a tiny bit by target
-      let biteTarget = ant.biteTarget;
-      if (biteTarget !== undefined) {
-        switch (biteTarget.color) {
-        case COLORS.WALL:
-          let wall = wallItems.find(i => i.x == biteTarget.coord.x && i.y == biteTarget.coord.y);
-          if (wall !== undefined) {
-            wall.health -= 65;
-            ant.decHealth(45);
-          }
-          break;
-        case COLORS.TARGET:
-          let tgt = globalTargets.find(i => i.x == biteTarget.coord.x && i.y == biteTarget.coord.y);
-          if (tgt !== undefined) {
-            tgt.health -= 5;
-            ant.zeroHealth();
-          }
-          break;
-        }
-      }
-    }
-    globalMap[ant.x][ant.y] = COLORS.ANT;
-  });
-
-  let squaredRange = Math.pow(config.guns.gunRange, 2);
-  guns.forEach(gun => {
-    let closestAnt = ants.find(a => getRelativeDistance(a, gun) <= squaredRange);
-    var newItem = gun.live(closestAnt);
-    if (newItem !== undefined) {
-      bullets.push(newItem);
-    }
-  });
-  bullets.forEach(bullet => {
-    let bc = bullet.coord();
-    if (bc !== undefined) {
-      let bColor = globalMap[bc.x][bc.y];
-      bullet.live(bColor);
-      if (bColor === COLORS.ANT) {
-        ants.filter(a => (a.x === bc.x) && (a.y === bc.y)).forEach(a => a.decHealth(config.guns.bulletDamage));
-        bullet.dead = true;
-      }
-    }
-    // Make an ant lose health if it hits the ant
-  });
-  bullets = bullets.filter(x => x.dead === false);
-
-  // domUpdate();
-  // TODO: Uncomment this later
-
-
+  world.updateWorld();
   drawWorld();
 
   if (tick > config.world.runs || globalTargets.length === 0) {
@@ -189,12 +94,12 @@ function updateWorld() {
 
 function drawWorld() {
   clearScreen(backgroundColor);
-  ants.forEach(x => putSizedPixel(x.coord(), x.antColor(), config.world.factor));
-  wallItems.forEach(x => putSizedPixel(x, [x.health, x.health, 0], config.world.factor));
-  permWallItems.forEach(x => putSizedPixel(x, [255, 0, 0], config.world.factor));
-  globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, config.world.factor));
-  guns.forEach(x => putSizedPixel(x.coord(), gunColor, config.world.factor));
-  bullets.forEach(x => {
+  world.ants.forEach(x => putSizedPixel(x.coord(), x.antColor(), config.world.factor));
+  world.wallItems.forEach(x => putSizedPixel(x, [x.health, x.health, 0], config.world.factor));
+  world.permWallItems.forEach(x => putSizedPixel(x, [255, 0, 0], config.world.factor));
+  world.globalTargets.forEach(x => putSizedPixel(x.coord(), targetColor, config.world.factor));
+  world.guns.forEach(x => putSizedPixel(x.coord(), gunColor, config.world.factor));
+  world.bullets.forEach(x => {
     let crd = x.coord();
     if (crd !== undefined) {
       putSingleSizedPixel(x.coord(), bulletColor, config.world.factor, 2);
@@ -299,6 +204,6 @@ document.getElementById('canvas').addEventListener('mouseup', canvasClickHandler
 document.getElementById('start').addEventListener('mouseup', startMovement, drawInterval);
 document.getElementById('stop').addEventListener('mouseup', stopMovement);
 
-// startMovement();
+startMovement();
 // domUpdate();
 buttonPriceUpdate();

@@ -4,21 +4,23 @@ import config from './config.js';
 
 export class Ant {
 
-  constructor(x, y, maxX, maxY, tick) {
+  constructor(x, y, world) {
     // Some things that should be static
     this.contextSize = 3;
-    this.jitter = true;
+    this.jitter = false;
     this.jitterFactor = getRandomInt(0, 5);
-    this.maxX = maxX;
-    this.maxY = maxY;
+    this.world = world;
+    this.maxX = world.matrix_width;
+    this.maxY = world.matrix_height;
     // Things that aren't static this.maxX = maxX; this.maxY = maxY;
     this.speedPerTick = 1; // TODO: Integrate this into movement.
-    this.lastTick = undefined || 0;
+    // this.lastTick = undefined || 0;
     this.health = config.ant.startingHealth;
     this.x = x;
     this.y = y;
-    this.maxDist = getDistance({x: 0, y: 0}, {x: maxX, y: maxY});
-    this.maxRelDist = getRelativeDistance({x: 0, y: 0}, {x: maxX, y: maxY});
+
+    // TODO: These two can ref world
+    this.maxDist = getDistance({x: 0, y: 0}, {x: this.maxX, y: this.maxY});
     this.tc = [];
     this.history = [];
   }
@@ -117,7 +119,7 @@ export class Ant {
       });
     finalChoice = choices.reduce(
       (a,b) => (a.distance < b.distance ? a : b),
-      {distance: this.maxRelDist});
+      {distance: this.world.maxRelDist});
 
     if (finalChoice !== undefined) {
       moveOpt = finalChoice.coord;
@@ -144,7 +146,7 @@ export class Ant {
       })
       .reduce(
         (a, b) => (a.dist < b.dist ? a: b),
-        {dist: this.maxRelDist}).t;
+        {dist: this.world.maxRelDist}).t;
   }
 
   normalizeTempContext(x, y) {

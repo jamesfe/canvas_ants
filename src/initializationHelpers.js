@@ -25,10 +25,13 @@ export function initialGlobalTargets(h, w, num, debug) {
   return (tgts);
 }
 
-export function initialAnts(h, w, tgts, type, num) {
+export function initialAnts(world, type, num) {
+  // TODO: Remove tgs as arg
   /* Generate some initial ants */
-  h -= 1;
-  w -= 1;
+  let h = world.matrix_height - 1;
+  let w = world.matrix_width - 1;
+  // h -= 1;
+  // w -= 1;
   var a = [];
   var c = {x: 0, y: 0};
   for (var i = 0; i < num; i++) {
@@ -40,8 +43,8 @@ export function initialAnts(h, w, tgts, type, num) {
       c = getRandomCoordinate(h, w);
       break;
     }
-    a.push(new Ant(c.x, c.y, w, h));
-    a[i].registerTargets(tgts);
+    a.push(new Ant(c.x, c.y, world));
+    a[i].registerTargets(world.globalTargets);
   }
   return (a);
 }
@@ -111,11 +114,11 @@ export function buildPermWall(w, h, items) {
 
 export function buildWallItems(w, h, items) {
   /* Act on wallItems array as a side-effect */
-  for (var x = 0; x < w; x ++) {
-    for (var y = 0; y < h; y ++) {
-      if ((y > 60 && y < 80 ) || (y > 140 && y < 160)) {
+  for (var x = 10; x < w - 10; x++) {
+    for (var y = 10; y < h - 10; y++) {
+      //if ((y > 60 && y < 80 ) || (y > 140 && y < 160)) {
         items.push({x: x, y: y, health: 255});
-      }
+      // }
     }
   }
   return (items);

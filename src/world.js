@@ -11,6 +11,7 @@ import {
   getEdgeCoordinate,
   COLORS,
   getMoveOptions,
+  getDistance,
   getRelativeDistance } from './utils.js';
 
 import { Ant } from './ant.js';
@@ -21,6 +22,7 @@ import { Gun } from './gun.js';
 export class World {
 
   constructor(canvas, config) {
+    this.debug = false;
     this.tick = 0;
     this.antsKilled = 0;
     this.budget = config.budget.startingBudget;
@@ -28,14 +30,44 @@ export class World {
     this.matrix_height = Math.floor(canvas.height / config.world.factor);
     this.matrix_width = Math.floor(canvas.width / config.world.factor);
     this.matrix = new GlobalMap(this.matrix_height, this.matrix_width);
-    this.globalTargets = [new Target(100, 100)]; //initialGlobalTargets(this.matrix_height, this.matrix_width, config.world.initialTargets, false);
-    this.ants = initialAnts(this.matrix_height, this.matrix_width, this.globalTargets, 'rand', this.config.world.initialAnts);
-    this.guns = []; // initialGuns(this.matrix_height, this.matrix_width, config.guns.numGuns, config.guns.gunRange);
+
+    this.globalTargets = initialGlobalTargets(this.matrix_height, this.matrix_width, config.world.initialTargets, false);
+    this.guns = initialGuns(this.matrix_height, this.matrix_width, config.guns.numGuns, config.guns.gunRange);
     this.bullets = [];
     this.numAntsPerCycle = 1;
-    this.permWallItems = []; // buildPermRuins(this.matrix_width, this.matrix_height, []);
-    this.wallItems = []; // buildWallItems(this.matrix_width, this.matrix_height, []);
+    this.permWallItems = []; //buildPermRuins(this.matrix_width, this.matrix_height, []);
+    this.wallItems = buildWallItems(this.matrix_width, this.matrix_height, []);
 
+    if (this.debug === true) {
+      this.wallItems = this.buildDebugWall();
+      this.permWallItems = [];
+      this.globalTargets = [new Target(90, 90)];
+      this.guns = [];
+    }
+
+    this.ants = initialAnts(this, 'rand', this.config.world.initialAnts);
+
+    this.maxDist = getDistance({x: 0, y: 0}, {x: this.matrix_width, y: this.matrix_height});
+    this.maxRelDist  = getRelativeDistance({x: 0, y: 0}, {x: this.matrix_width, y: this.matrix_height});
+    this.deleteTargetCoordItems();
+  }
+
+  buildDebugWall() {
+    return ([
+      {x: 89, y: 91, health: 255},
+      {x: 90, y: 91, health: 255},
+      {x: 91, y: 91, health: 255},
+      {x: 89, y: 90, health: 255},
+      {x: 91, y: 90, health: 255},
+      {x: 89, y: 89, health: 255},
+      {x: 90, y: 89, health: 255},
+      {x: 91, y: 89, health: 255}]);
+  }
+
+  deleteTargetCoordItems() {
+    /* Make sure no items exist which overlap with the targets. */
+    // TODO: Check for other things which could interfere (guns, other wall items)
+    this.permWallItems = this.permWallItems.filter(pw => this.globalTargets.filter(tg => pw.x === tg.x && pw.y === tg.y).length === 0);
   }
 
   generateNewAnt() {
@@ -44,7 +76,7 @@ export class World {
     while (this.matrix.getCoord(c.x, c.y) !== COLORS.NOTHING) {
       c = getEdgeCoordinate(this.matrix_height, this.matrix_width);
     }
-    let a = new Ant(c.x, c.y, this.matrix_width, this.matrix_height);
+    let a = new Ant(c.x, c.y, this);
     a.registerTargets(this.globalTargets); // TODO: refactor
     return (a);
   }
@@ -76,7 +108,6 @@ export class World {
             case COLORS.TARGET:
               let tgt = this.globalTargets.find(i => i.x == biteTarget.coord.x && i.y == biteTarget.coord.y);
               if (tgt !== undefined) {
-                console.log('bite ', tgt.health);
                 tgt.health -= 5;
                 ant.zeroHealth();
               }
@@ -84,21 +115,19 @@ export class World {
             }
         }
       }
-      this.matrix.setAnt(ant.x, ant.y);
+      if (ant.health > 0) {
+        this.matrix.setAnt(ant.x, ant.y);
+      }
     });
 
   }
 
-
   addNewAnts() {
-    /*
     if ((this.tick % this.config.world.spawnCycle === 0) && (this.tick % this.config.world.restCycle !== 0) && (this.tick <= 4500)) {
-      this.numAntsPerCycle = 1; // this.tick;
+      this.numAntsPerCycle = this.tick;
     } else {
       this.numAntsPerCycle = 0;
     }
-  */
-    this.numAntsPerCycle = 1;
     for (var i = 0; i < this.numAntsPerCycle; i++) {
       let a = this.generateNewAnt();
       if (a !== undefined) {
@@ -148,8 +177,13 @@ export class World {
     updateTargets = (preLength !== this.globalTargets.length);
     this.globalTargets.forEach(x => this.matrix.setTarget(x.x, x.y));
     this.permWallItems.forEach(x => this.matrix.setPermWall(x.x, x.y));
+    this.wallItems.forEach(w => {
+      if (w.health > 0)
+        this.matrix.setWall(w.x, w.y)
+      else
+        this.matrix.setNothing(w.x, w.y)
+    });
     this.wallItems = this.wallItems.filter(x => x.health > 0);
-    this.wallItems.forEach(x => this.matrix.setWall(x.x, x.y));
     return (updateTargets);
   }
 
@@ -174,9 +208,6 @@ class GlobalMap {
     this.matrix = new Array(height).fill([]).map(x => Array(width).fill(0));
   }
   setAnt(x, y) {
-    if ((x === 99) && (y === 99)) {
-      console.log('entering');
-    }
     this.matrix[x][y] = COLORS.ANT;
   }
 
@@ -185,9 +216,6 @@ class GlobalMap {
   }
 
   setNothing(x, y) {
-  if ((x === 99) && (y === 99)) {
-      console.log('clearing');
-  }
     this.matrix[x][y] = COLORS.NOTHING;
   }
 

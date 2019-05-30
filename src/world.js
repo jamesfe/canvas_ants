@@ -91,7 +91,9 @@ export class World {
       this.matrix.setNothing(x, y);
       ant.updateTempContext(this.matrix.getTempContext(getMoveOptions(ant.coord())));
       // This next line updates biteTarget
+
       let hasMoved = ant.chooseNextPath(this.tick);
+      // TODO: Bug: sometimes an ant can move onto a target.
 
       if (hasMoved === false) {
         // bite logic differs a tiny bit by target

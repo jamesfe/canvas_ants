@@ -114,8 +114,8 @@ export function buildPermWall(w, h, items) {
 
 export function buildWallItems(w, h, items) {
   /* Act on wallItems array as a side-effect */
-  for (var x = 10; x < w - 10; x++) {
-    for (var y = 10; y < h - 10; y++) {
+  for (var x = 85; x < 95; x++) {
+    for (var y = 85; y < 95; y++) {
       //if ((y > 60 && y < 80 ) || (y > 140 && y < 160)) {
         items.push({x: x, y: y, health: 255});
       // }

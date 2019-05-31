@@ -9,7 +9,7 @@ let config = {
     factor: 6,
     runs: 5000,
     timePerRun: 60,
-    initialTargets: 5,    // how many targets do we start with
+    initialTargets: 25,    // how many targets do we start with
     initialAnts: 1,
     width: 900,
     height: 900,

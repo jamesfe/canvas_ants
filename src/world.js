@@ -22,7 +22,7 @@ import { Gun } from './gun.js';
 export class World {
 
   constructor(canvas, config) {
-    this.debug = false;
+    this.debug = true;
     this.tick = 0;
     this.antsKilled = 0;
     this.budget = config.budget.startingBudget;
@@ -39,7 +39,8 @@ export class World {
     this.wallItems = buildWallItems(this.matrix_width, this.matrix_height, []);
 
     if (this.debug === true) {
-      this.wallItems = this.buildDebugWall();
+      //this.wallItems = this.buildDebugWall();
+      this.wallItems = buildWallItems(this.matrix_width, this.matrix_height, []);
       this.permWallItems = [];
       this.globalTargets = [new Target(90, 90)];
       this.guns = [];
@@ -66,8 +67,9 @@ export class World {
 
   deleteTargetCoordItems() {
     /* Make sure no items exist which overlap with the targets. */
-    // TODO: Check for other things which could interfere (guns, other wall items)
+    // TODO: Check for other things which could interfere (guns)
     this.permWallItems = this.permWallItems.filter(pw => this.globalTargets.filter(tg => pw.x === tg.x && pw.y === tg.y).length === 0);
+    this.wallItems= this.wallItems.filter(pw => this.globalTargets.filter(tg => pw.x === tg.x && pw.y === tg.y).length === 0);
   }
 
   generateNewAnt() {
@@ -91,10 +93,7 @@ export class World {
       this.matrix.setNothing(x, y);
       ant.updateTempContext(this.matrix.getTempContext(getMoveOptions(ant.coord())));
       // This next line updates biteTarget
-
       let hasMoved = ant.chooseNextPath(this.tick);
-      // TODO: Bug: sometimes an ant can move onto a target.
-
       if (hasMoved === false) {
         // bite logic differs a tiny bit by target
         let biteTarget = ant.biteTarget;
@@ -126,7 +125,7 @@ export class World {
 
   addNewAnts() {
     if ((this.tick % this.config.world.spawnCycle === 0) && (this.tick % this.config.world.restCycle !== 0) && (this.tick <= 4500)) {
-      this.numAntsPerCycle = this.tick;
+      this.numAntsPerCycle = 100; // this.tick;
     } else {
       this.numAntsPerCycle = 0;
     }
@@ -195,6 +194,7 @@ export class World {
     this.handleAntMoves(updateTargets);
     this.addNewAnts();
     this.handleGunsAndBullets();
+
     this.tick += 1;
   }
 

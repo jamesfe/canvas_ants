@@ -22,7 +22,7 @@ import { Gun } from './gun.js';
 export class World {
 
   constructor(canvas, config) {
-    this.debug = true;
+    this.debug = false;
     this.tick = 0;
     this.antsKilled = 0;
     this.budget = config.budget.startingBudget;
@@ -35,15 +35,15 @@ export class World {
     this.guns = initialGuns(this.matrix_height, this.matrix_width, config.guns.numGuns, config.guns.gunRange);
     this.bullets = [];
     this.numAntsPerCycle = 1;
-    this.permWallItems = []; //buildPermRuins(this.matrix_width, this.matrix_height, []);
+    this.permWallItems = buildPermRuins(this.matrix_width, this.matrix_height, []);
     this.wallItems = buildWallItems(this.matrix_width, this.matrix_height, []);
 
     if (this.debug === true) {
       //this.wallItems = this.buildDebugWall();
-      this.wallItems = buildWallItems(this.matrix_width, this.matrix_height, []);
-      this.permWallItems = [];
+      this.wallItems = []; //buildWallItems(this.matrix_width, this.matrix_height, []);
+      this.permWallItems = this.buildDebugPermWall();
       this.globalTargets = [new Target(90, 90)];
-      this.guns = [];
+      this.guns = [new Gun(91, 91, this.matrix_width, this.matrix_height, 7)];
     }
 
     this.ants = initialAnts(this, 'rand', this.config.world.initialAnts);
@@ -51,6 +51,21 @@ export class World {
     this.maxDist = getDistance({x: 0, y: 0}, {x: this.matrix_width, y: this.matrix_height});
     this.maxRelDist  = getRelativeDistance({x: 0, y: 0}, {x: this.matrix_width, y: this.matrix_height});
     this.deleteTargetCoordItems();
+  }
+
+  buildDebugPermWall() {
+    var rv = [];
+    let xx = 84;
+    let yy = 96;
+    for (var x = xx; x <= yy; x++) {
+      rv.push({x: x, y: yy});
+      rv.push({x: x, y: xx});
+    }
+    for (var y = xx; y <= yy; y++) {
+      rv.push({y: y, x: xx});
+      rv.push({y: y, x: yy});
+    }
+    return (rv);
   }
 
   buildDebugWall() {
@@ -125,7 +140,7 @@ export class World {
 
   addNewAnts() {
     if ((this.tick % this.config.world.spawnCycle === 0) && (this.tick % this.config.world.restCycle !== 0) && (this.tick <= 4500)) {
-      this.numAntsPerCycle = 100; // this.tick;
+      this.numAntsPerCycle = this.tick;
     } else {
       this.numAntsPerCycle = 0;
     }
@@ -148,8 +163,8 @@ export class World {
   }
 
   handleGunsAndBullets() {
-    let squaredRange = Math.pow(this.config.guns.gunRange, 2);
     this.guns.forEach(gun => {
+      let squaredRange = gun.range * gun.range;
       let closestAnt = this.ants.find(a => getRelativeDistance(a, gun) <= squaredRange);
       var newItem = gun.live(closestAnt);
       if (newItem !== undefined) {
@@ -158,7 +173,7 @@ export class World {
     });
     this.bullets.forEach(bullet => {
       let bc = bullet.coord();
-      if (bc !== undefined) {
+      if ((bc !== undefined) && (bullet.dead === false)) {
         let bColor = this.matrix.getCoord(bc.x, bc.y);
         bullet.live(bColor);
         if (bColor === COLORS.ANT) {

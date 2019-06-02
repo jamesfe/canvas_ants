@@ -7,7 +7,7 @@ export class Ant {
   constructor(x, y, world) {
     // Some things that should be static
     this.contextSize = 3;
-    this.jitter = false;
+    this.jitter = true;
     this.jitterFactor = getRandomInt(0, 5);
     this.world = world;
     this.maxX = world.matrix_width;
@@ -88,6 +88,9 @@ export class Ant {
 
   decHealth(v) {
     this.health -= v;
+    if (this.health <= 0) {
+      this.world.matrix.setNothing(this.x, this.y);
+    }
   }
 
   zeroHealth() {

@@ -1,7 +1,7 @@
 let config = {
   guns: {
     gunRange: 25,
-    numGuns: 0,
+    numGuns: 50,
     bulletDamage: 101,
     firingRate: 2
   },

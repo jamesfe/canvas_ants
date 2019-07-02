@@ -22,7 +22,7 @@ import { Gun } from './gun.js';
 export class World {
 
   constructor(canvas, config) {
-    this.debug = false;
+    this.debug = true;
     this.tick = 0;
     this.antsKilled = 0;
     this.budget = config.budget.startingBudget;
@@ -35,13 +35,13 @@ export class World {
     this.guns = initialGuns(this.matrix_height, this.matrix_width, config.guns.numGuns, config.guns.gunRange);
     this.bullets = [];
     this.numAntsPerCycle = 1;
-    this.permWallItems = buildPermRuins(this.matrix_width, this.matrix_height, []);
+    this.permWallItems = []; //buildPermRuins(this.matrix_width, this.matrix_height, []);
     this.wallItems = buildWallItems(this.matrix_width, this.matrix_height, []);
 
     if (this.debug === true) {
       //this.wallItems = this.buildDebugWall();
       this.wallItems = []; //buildWallItems(this.matrix_width, this.matrix_height, []);
-      this.permWallItems = this.buildDebugPermWall();
+      this.permWallItems = []; //this.buildDebugPermWall();
       this.globalTargets = [new Target(90, 90)];
       this.guns = [new Gun(91, 91, this.matrix_width, this.matrix_height, 7)];
     }
@@ -245,6 +245,9 @@ class GlobalMap {
   }
 
   getCoord(x, y) {
+    if ((x < 0) || (y < 0) || (x >= this.width) || (y >= this.height)) {
+      return (COLORS.NOTHING);
+    }
     return (this.matrix[x][y]);
   }
 

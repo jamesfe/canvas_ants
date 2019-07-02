@@ -79,6 +79,7 @@ function updateWorld() {
     }
     clearInterval(globalDrawCancellation);
   }
+  domUpdate();
 }
 
 function drawWorld() {

@@ -203,6 +203,13 @@ export class World {
     return (updateTargets);
   }
 
+  continueRunning() {
+    if (this.tick > this.config.world.runs || this.globalTargets.length === 0) {
+       return (false);
+    }
+    return (true);
+  }
+
   updateWorld() {
     var updateTargets = this.initialUpdates();
     this.calculateAntDeaths();
@@ -211,6 +218,9 @@ export class World {
     this.handleGunsAndBullets();
 
     this.tick += 1;
+
+    return (this.continueRunning());
+
   }
 
 }

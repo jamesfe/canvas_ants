@@ -67,18 +67,12 @@ let domBudgetDisplay = document.getElementById('budgetDisplay');
 function updateWorld() {
   /* Deal with the business logic of the game. */
 
-  world.updateWorld();
-  drawWorld();
-
-  // TODO: Refactor this into world
-  if (world.tick > config.world.runs || world.globalTargets.length === 0) {
-    if (world.tick > config.world.runs) {
-      console.log('Congratulations, time ran out!');
-    } else {
-      console.log('You were unable to protect all the targets.');
-    }
+  var keepRunning = world.updateWorld();
+  if (!keepRunning) {
+    console.log('End of the run.');
     clearInterval(globalDrawCancellation);
   }
+  drawWorld();
   domUpdate();
 }
 
@@ -140,7 +134,7 @@ function newWall(x, y, mX, mY) {
 }
 
 
-// TODO move this max diagonal distance elsewhere (precompute somewhereE)
+// TODO move this max diagonal distance elsewhere (precompute somewhere)
 let maxRelDist = getRelativeDistance({x: 0, y: 0}, {x: gWidth, y: gHeight})
 function distanceToClosestTarget(x, y, maxDist) {
   // TODO: move this into the world Class

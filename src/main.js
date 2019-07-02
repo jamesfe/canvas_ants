@@ -134,18 +134,13 @@ function newWall(x, y, mX, mY) {
 }
 
 
-// TODO move this max diagonal distance elsewhere (precompute somewhere)
-let maxRelDist = getRelativeDistance({x: 0, y: 0}, {x: gWidth, y: gHeight})
 function distanceToClosestTarget(x, y, maxDist) {
-  // TODO: move this into the world Class
-  return world.globalTargets
-      .map(i => {
+  return world.globalTargets.map(i => {
         let b = {dist: getRelativeDistance({x: x, y: y}, i.coord()), t: i};
         return b;
-      })
-      .reduce(
+      }).reduce(
         (a, b) => (a.dist < b.dist ? a: b),
-        {dist: maxRelDist}).t;
+        {dist: world.maxRelDist}).dist;
 }
 
 
@@ -165,12 +160,13 @@ function canvasClickHandler(event) {
   }
   else if ((clickAction === 'add_perm_wall') && (world.budget >= config.prices.permWall)) {
     if (world.permWallItems.find(b => (b.x === x && b.y === y)) === undefined) {
-      world.permWallItems.push({x: x, y: y});
-      world.budget -= config.prices.permWall;
+      if (distanceToClosestTarget(x, y, world.maxRelDist) > config.world.distToPermWall) {
+        world.permWallItems.push({x: x, y: y});
+        world.budget -= config.prices.permWall;
+      } else {
+        console.log('Too close to a target.');
+      }
     }
-    let pp = distanceToClosestTarget(x, y, maxRelDist);
-    // TODO: just get the distance, not the target
-    console.log(pp);
   }
   domUpdate();
 }

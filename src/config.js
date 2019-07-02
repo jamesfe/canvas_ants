@@ -14,7 +14,8 @@ let config = {
     width: 900,
     height: 900,
     spawnCycle: 50,       // How often do ants spawn
-    restCycle: 1500       // How often do we not spawn ants (these cycles %)
+    restCycle: 1500,      // How often do we not spawn ants (these cycles %)
+    distToPermWall: 200   // How far from a target must a perm wall be?
   },
   ant: {
     startingHealth: 100
